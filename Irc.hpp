@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/12 13:52:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/12 14:44:46 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/12 18:56:16 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,5 @@
 #include <iostream>
 #include <cstdlib>
 #include "Server.hpp"
-
-
 
 #endif
