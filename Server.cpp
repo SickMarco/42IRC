@@ -6,14 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/12 19:00:27 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/13 20:46:34 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(const int& p, const std::string& pass) : port(p), serverPassword("ShFg]PWWaQY") , userPassword(pass){
-	encryptPassword();
+Server::Server(const int& p, const std::string& pass) : port(p), serverPassword("ktm") , userPassword(pass){
 	if (port != SERVER_PORT)
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
@@ -23,13 +22,6 @@ Server::Server(const int& p, const std::string& pass) : port(p), serverPassword(
 
 Server::~Server(){
 	close(serverSocket);
-}
-
-void Server::encryptPassword(){
-	std::string key = "ludro";
-    for (std::size_t i = 0; i < userPassword.length(); ++i) {
-       userPassword[i] = ((userPassword[i] - 32) + (key[i % key.length()] - 32)) % 95 + 32;
-    }
 }
 
 /**
@@ -62,6 +54,7 @@ void Server::binding(){
 }
 
 void Server::tester(){
+	User user;
 	while (1)
 	{
 		struct pollfd fds[1];
@@ -79,40 +72,48 @@ void Server::tester(){
 		} else {
 			// Ci sono connessioni in arrivo, esegui accept
 			if (fds[0].revents & POLLIN) {
-				clientAddrLen = sizeof(clientAddr);
-				clientSocket = accept(serverSocket, (struct sockaddr*) &clientAddr, &clientAddrLen);
-				if (clientSocket < 0) {
+				user.socketAccept(serverSocket);
+				if (user.getSocket() < 0) {
 					if (errno != EWOULDBLOCK && errno != EAGAIN) {
 						perror("Accept error");
 						break;
 					}
 				} else {
+					user.setNick();
 					std::string welcomeMsg = "Benvenuto nel server IRC!\n";
-					if (send(clientSocket, welcomeMsg.c_str(), strlen(welcomeMsg.c_str()), 0) < 0) {
+					if (send(user.getSocket(), welcomeMsg.c_str(), strlen(welcomeMsg.c_str()), 0) < 0) {
 						perror("Send error");
-						close(clientSocket);
+						close(user.getSocket());
 						break;
 					}
 					// Ricevi un messaggio dal client
 					while(1)
 					{
 						char buffer[1024];
-						ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+						ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 						if (bytesRead < 0) {
 							perror("Receive error");
-							close(clientSocket);
+							close(user.getSocket());
 							break ;
 						} else if (bytesRead == 0) {
 							// Il client ha chiuso la connessione
-							close(clientSocket);
+							close(user.getSocket());
 							break ;
 						}
 						buffer[bytesRead] = '\0';
-						if (!strcmp(buffer, "exit\n"))
-							break ;
+						std::string ktm = buffer;
+						if (!strncmp(buffer, "JOIN", 4))
+						{
+							if (send(user.getSocket(), ":mbozzi JOIN #ktm\r\n", 20, 0) < 0)
+								perror("Send error");
+						}
+						else if (!strncmp(buffer, "NICK", 4))
+						{
+							user.changeNickname(ktm.substr(5, ktm.find('\n') - 1));
+						}
 						printf("Messaggio ricevuto dal client: %s", buffer);
 					}
-					close(clientSocket);
+					close(user.getSocket());
 					break; 
 				}
 			}

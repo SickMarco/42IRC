@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/13 20:46:31 by mbozzi           ###   ########.fr       */
+/*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
+/*   Updated: 2023/07/13 20:24:56 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef USER_HPP
+#define USER_HPP
 
 #include <iostream>
 #include <string>
@@ -25,33 +25,25 @@
 #include <errno.h>
 #include <poll.h>
 
-#include "Irc.hpp"
-#include "User.hpp"
-
-
-#define SERVER_PORT 6667
-
-class Server
+class User
 {
 private:
-	//SERVER INIT
-	const int port;
-	const std::string serverPassword;
-	std::string userPassword;
-
-	//SOCKET
-	int serverSocket;
-	struct sockaddr_in serverAddr;
-
-	void socketInit();
-	void binding();
+	struct sockaddr_in clientAddr;
+	socklen_t clientAddrLen;
+	int clientSocket;
+	std::string nick;
+	std::string realname;
+	std::string host;
+	//char buffer[1024];
 
 public:
-	Server(const int& port, const std::string& password);
-	~Server();
+	User();
+	~User();
 
-	void start();
-	void tester();
+	void socketAccept(const int serverSocket);
+	int getSocket() const;
+	void setNick();
+	void changeNickname(const std::string& newNick);
 };
 
 #endif

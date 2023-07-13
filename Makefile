@@ -1,6 +1,7 @@
 NAME = ircserv
 
-SRC = main.cpp Server.cpp
+SRC = main.cpp Server.cpp User.cpp
+
 OBJ_DIR = ./.obj/
 
 CC = c++
