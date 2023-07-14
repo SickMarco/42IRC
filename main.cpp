@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:23:52 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/12 19:02:08 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/14 15:03:43 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,12 @@ int main(int ac, char **av)
 		const std::string pswd = av[2];
 		try {
 			Server server(port, pswd);
+			server.tester();
 		}
 		catch(const std::exception& e) {
 			std::cerr << e.what() << '\n';
 			return 1;
 		}
-
-		Server server(port, pswd);
-		server.tester();
 	}
 	else
 		std::cerr << "Error: insert <port> <password>" << std::endl;

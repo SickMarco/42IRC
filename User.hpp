@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/13 20:24:56 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/14 18:21:27 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <poll.h>
+#include <algorithm>
 
 class User
 {
@@ -33,8 +34,9 @@ private:
 	int clientSocket;
 	std::string nick;
 	std::string realname;
+
 	std::string host;
-	//char buffer[1024];
+	char *ServerIP;
 
 public:
 	User();
@@ -42,8 +44,9 @@ public:
 
 	void socketAccept(const int serverSocket);
 	int getSocket() const;
-	void setNick();
-	void changeNickname(const std::string& newNick);
+	void setIP(char* IP);
+	void setNick(char* input);
+	//void changeNickname(std::string newNick);
 };
 
 #endif

@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/13 20:47:09 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/14 18:21:10 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
 
-User::User() : clientSocket(-1) {}
+User::User() : clientSocket(-1), nick("") {}
 
 User::~User(){}
 
@@ -26,20 +26,30 @@ void User::socketAccept(const int serverSocket){
 
 int User::getSocket() const { return this->clientSocket; }
 
-void User::setNick() {
-	char name[1024];
-	ssize_t bt = recv(clientSocket, name, sizeof(name) - 1, 0);
-	if (bt < 0)
-		perror("Receive error");
-	name[bt] = '\0';
-	std::string tmp = name;
-	size_t find = tmp.find("NICK") + 5;
-	std::string tmp1 = tmp.substr(find , tmp.npos);
-	std::string tmp2 = tmp1.substr(0 , tmp1.find('\r'));
-	this->nick = tmp2;
+void User::setIP(char* IP){ this->ServerIP = IP; }
+
+void User::setNick(char* input) {
+	const char delimiter[] = " \r\n";
+
+    char* token = std::strtok(input, delimiter);
+    while (token != NULL) {
+        if (std::strcmp(token, "NICK") == 0) {
+            token = std::strtok(NULL, delimiter);
+            if (token != NULL)
+				nick = std::string(token);
+            break;
+        }
+        token = std::strtok(NULL, delimiter);
+    }
+	std::cout << "NICKNAME : " << nick << std::endl;
 }
 
-void User::changeNickname(const std::string& newNick){
-	std::string message = ":" + nick + "!" + "mbozzi@127.0.0.1" + " NICK :" + newNick + "\r\n";
+/* void User::changeNickname(std::string newNick){
+	std::string message;
+	newNick.erase(std::remove(newNick.begin(), newNick.end(), '\n'), newNick.end());
+	std::cout << "NEWNICK: " << newNick << std::endl;
+	message = ":" + nick + "!" + "c2r3p5.42firenze.it@" + ServerIP + " NICK :" + newNick + "\r\n";
+	std::cout << message << std::endl;
 	send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
-}
+	nick = newNick;
+} */

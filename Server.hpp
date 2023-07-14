@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/13 20:46:31 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/14 18:26:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <poll.h>
+#include <netdb.h>
 
 #include "Irc.hpp"
 #include "User.hpp"
@@ -38,11 +39,14 @@ private:
 	const int port;
 	const std::string serverPassword;
 	std::string userPassword;
+	char hostname[256];
+	char *IP;
 
 	//SOCKET
 	int serverSocket;
 	struct sockaddr_in serverAddr;
 
+	void getMyIP();
 	void socketInit();
 	void binding();
 
@@ -52,6 +56,9 @@ public:
 
 	void start();
 	void tester();
+	void printStringNoP(const char* str, std::size_t length);
+	void newClientConnected(User& user);
+	void messageHandler(User& user);
 };
 
 #endif
