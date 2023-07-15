@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/14 18:21:27 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 17:26:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ public:
 
 	void socketAccept(const int serverSocket);
 	int getSocket() const;
+	void setSocket(const int& newSocket);
 	void setIP(char* IP);
 	void setNick(char* input);
+	void joinChannel(const std::string& channel);
 	//void changeNickname(std::string newNick);
 };
 

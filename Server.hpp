@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/14 18:26:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 17:15:30 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 
 
 #define SERVER_PORT 6667
+#define MAX_CLIENTS 100
 
 class Server
 {
@@ -54,7 +55,6 @@ public:
 	Server(const int& port, const std::string& password);
 	~Server();
 
-	void start();
 	void tester();
 	void printStringNoP(const char* str, std::size_t length);
 	void newClientConnected(User& user);

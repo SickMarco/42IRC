@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/14 18:21:10 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 19:01:13 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@ void User::socketAccept(const int serverSocket){
 
 int User::getSocket() const { return this->clientSocket; }
 
+void User::setSocket(const int& newSocket) { this->clientSocket = newSocket; }
+
 void User::setIP(char* IP){ this->ServerIP = IP; }
 
 void User::setNick(char* input) {
-	const char delimiter[] = " \r\n";
+	const char delimiter[] = " \n";
 
     char* token = std::strtok(input, delimiter);
     while (token != NULL) {
@@ -53,3 +55,8 @@ void User::setNick(char* input) {
 	send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
 	nick = newNick;
 } */
+
+void User::joinChannel(const std::string& channel){
+	std::string join = ":" + nick + "!" + host + "@" + ServerIP + " JOIN :" + channel + "\r\n";
+	send(clientSocket, join.c_str(), join.length(), 0);
+}
