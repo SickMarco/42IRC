@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <netdb.h>
+#include <sstream>
 
 #include "User.hpp"
 #include "Irc.hpp"
@@ -54,6 +55,9 @@ private:
 	void binding();
 	int messageToPrivate(std::string buffer);
 	int messageToChannel(std::string buffer);
+
+	int messageToChannel(std::string buffer);
+	int messageToPrivate(std::string buffer);
 
 public:
 	Server(const int& port, const std::string& password);

@@ -37,7 +37,7 @@ void User::setNick(char* input) {
 
 std::string User::getNick() const
 {
-	return nick;
+	return (nick);
 }
 
 /* void User::changeNickname(std::string newNick){

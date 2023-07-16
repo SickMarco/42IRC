@@ -153,7 +153,8 @@ int Server::messageToPrivate(std::string buffer)
     return 0;
 }
 
-void Server::tester() {
+void Server::tester()
+{
     // Inizializza l'array di client
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         clients[i].setSocket(-1); // Resetta lo stato di ogni client
