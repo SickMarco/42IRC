@@ -46,6 +46,11 @@ void User::setNick(char* input) {
 	std::cout << "NICKNAME : " << nick << std::endl;
 }
 
+std::string User::getNick() const
+{
+	return (nick);
+}
+
 /* void User::changeNickname(std::string newNick){
 	std::string message;
 	newNick.erase(std::remove(newNick.begin(), newNick.end(), '\n'), newNick.end());

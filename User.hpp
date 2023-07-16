@@ -47,6 +47,7 @@ public:
 	void setSocket(const int& newSocket);
 	void setIP(char* IP);
 	void setNick(char* input);
+	std::string getNick() const;
 	void joinChannel(const std::string& channel);
 	//void changeNickname(std::string newNick);
 };

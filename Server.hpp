@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <netdb.h>
+#include <sstream>
 
 #include "Irc.hpp"
 #include "User.hpp"
@@ -43,6 +44,8 @@ private:
 	char hostname[256];
 	char *IP;
 
+	User clients[MAX_CLIENTS];
+
 	//SOCKET
 	int serverSocket;
 	struct sockaddr_in serverAddr;
@@ -50,6 +53,9 @@ private:
 	void getMyIP();
 	void socketInit();
 	void binding();
+
+	int messageToChannel(std::string buffer);
+	int messageToPrivate(std::string buffer);
 
 public:
 	Server(const int& port, const std::string& password);

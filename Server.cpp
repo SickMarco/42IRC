@@ -115,18 +115,53 @@ void Server::messageHandler(User& user){
 			while (*buffer != ' ')
 				(*buffer)++;
 			user.joinChannel(buffer);
-		}
-		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
+		}//PRIVMSG rory :Hey Rory...
+        else if (!strncmp(buffer, "PRIVMSG ", 8))
+        {
+            if (buffer[8] == '#')
+                messageToChannel(&(buffer[8]));
+            else
+                messageToPrivate(&(buffer[8]));
+        }
+		
+        printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
 		//std::cout << bytesRead << std::endl;
 		//std::cout << buffer << std::endl;
 		std::memset(buffer, 0, sizeof(buffer));
 	}
 }
 
-void Server::tester() {
-	
-    User clients[MAX_CLIENTS]; // Array di client
+int Server::messageToChannel(std::string buffer)
+{
+    std::string channel = buffer.substr(1, buffer.find(' '));
+    return 0;
+}
 
+int Server::messageToPrivate(std::string buffer)
+{
+    std::string name = buffer.substr(0, buffer.find(' '));
+    std::string mex = buffer.substr(name.length() + 1, std::string::npos);
+
+    int clientSocket = -1;
+    for (size_t i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (clients[i].getNick() == name)
+        {
+            clientSocket = clients[i].getSocket();
+            break;
+        }
+    }
+
+    if (clientSocket != -1)// Send the private message to the target client
+        send(clientSocket, mex.c_str(), mex.length(), 0);
+    else
+        return 1;// Client not found
+    
+    return 0;
+}
+
+void Server::tester()
+{
     // Inizializza l'array di client
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         clients[i].setSocket(-1); // Resetta lo stato di ogni client
