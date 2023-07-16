@@ -43,6 +43,8 @@ private:
 	char hostname[256];
 	char *IP;
 
+	User clients[MAX_CLIENTS];
+
 	//SOCKET
 	int serverSocket;
 	struct sockaddr_in serverAddr;
@@ -50,6 +52,8 @@ private:
 	void getMyIP();
 	void socketInit();
 	void binding();
+	int messageToPrivate(std::string buffer);
+	int messageToChannel(std::string buffer);
 
 public:
 	Server(const int& port, const std::string& password);

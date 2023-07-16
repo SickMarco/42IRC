@@ -49,6 +49,7 @@ public:
 	void setSocket(const int& newSocket);
 	void setIP(char* IP);
 	void setNick(char* input);
+	std::string getNick() const;
 	void joinChannel(const char* buffer);
 	friend std::string trimMessage(const char* buffer, size_t startIndex);
 	friend void printStringNoP(const char* str, std::size_t length);
