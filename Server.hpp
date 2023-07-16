@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/16 16:16:48 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/16 19:31:36 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,8 @@ private:
 	void getMyIP();
 	void socketInit();
 	void binding();
-	int messageToPrivate(std::string buffer);
-	int messageToChannel(std::string buffer);
+	int messageToPrivate(User& user, std::string buffer);
+	int messageToChannel(User& user, std::string buffer);
 
 	void joinChannel(std::string channelName, User client);
 

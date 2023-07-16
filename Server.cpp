@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/16 16:17:09 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/16 20:18:09 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@ Server::~Server(){
 	close(serverSocket);
 }
 
-void removeCRLF(){
-
+std::string removeCRLF(const char* buffer){
+    std::string input = buffer;
+	std::string ret = input.substr(0, input.length() - 1);
+    return ret;
 }
 
 /**
@@ -94,61 +96,73 @@ void Server::newClientConnected(User& user){
 }
 
 void Server::messageHandler(User& user){
-	while(1)
-	{
 		char buffer[1024];
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		if (bytesRead < 0) {
 			perror("Receive error");
 			close(user.getSocket());
-			break ;
+			return ;
 		} else if (bytesRead == 0) {
 			close(user.getSocket());
 			user.setSocket(-1);
-			break ;
+			return ;
 		}
 		buffer[bytesRead] = '\0';
 		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
 		/* if(!strncmp(buffer, "NICK", 4))
 			user.changeNickname(buffer); */
 	 	if(!strncmp(buffer, "JOIN #", 6))
-			joinChannel(&(buffer[6]), user);
+			joinChannel(removeCRLF(&(buffer[6])), user);
         else if (!strncmp(buffer, "PRIVMSG ", 8))
         {
             if (buffer[8] == '#')
-                messageToChannel(&(buffer[9]));
+                messageToChannel(user, removeCRLF(&(buffer[9])));
             else
-                messageToPrivate(&(buffer[8]));
+                messageToPrivate(user, removeCRLF(&(buffer[8])));
         }
 		std::memset(buffer, 0, sizeof(buffer));
-	}
 }
 
-int Server::messageToChannel(std::string buffer)
+int Server::messageToChannel(User& user, std::string buffer)
 {
     std::string channelName = buffer.substr(0, buffer.find(' '));
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
 
     // Find the channel
     std::map<std::string, std::vector<User> >::iterator it = channels.find(channelName);
+    std::cout << "SIZE " << channels.size() << std::endl;
+	for (std::map<std::string, std::vector<User> >::iterator start = channels.begin(); start != channels.end(); ++start)
+		printStringNoP(start->first.c_str(), start->first.length());
+    
     if (it != channels.end())
     {
         // Channel exists, send the message to all clients in the channel
         std::vector<User> channelClients = it->second;
+        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex.substr(0, mex.length()) + "\n";
+        
+        printStringNoP(privmsg.c_str(), privmsg.length());
         for (size_t i = 0; i < channelClients.size(); ++i)
-            send(channelClients[i].getSocket(), mex.c_str(), mex.length(), 0);
+        {
+            if (channelClients[i].getSocket() != -1)
+            {
+                std::cout << "CLIENT FOUND" << std::endl;
+                send(channelClients[i].getSocket(), privmsg.c_str(), privmsg.length(), 0);
+            }
+        }
     }
-
+    else
+        std::cout << "CHANNEL NOT FOUND" << std::endl;
     return 0;
 }
 
-int Server::messageToPrivate(std::string buffer)
+int Server::messageToPrivate(User& user, std::string buffer)
 {
     std::string name = buffer.substr(0, buffer.find(' '));
     std::string mex = buffer.substr(name.length() + 1, std::string::npos);
 
     int clientSocket = -1;
-    for (size_t i = 0; i < MAX_CLIENTS; i++)
+    size_t i;
+    for (i = 0; i < MAX_CLIENTS; i++)
     {
         if (clients[i].getNick() == name)
         {
@@ -156,12 +170,9 @@ int Server::messageToPrivate(std::string buffer)
             break;
         }
     }
-
-    if (clientSocket != -1)// Send the private message to the target client
-        send(clientSocket, mex.c_str(), mex.length(), 0);
-    else
-        return 1;// Client not found
-    
+    //std::string privmsg = ":" + user.getNick() + "!" + hostname + "@" + IP + " PRIVMSG " + name + " " + mex.substr(0, mex.length() - 1) + "\r\n";
+    std::string privmsg = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length() - 1) + "\r\n";
+    send(clientSocket,  privmsg.c_str(),  privmsg.length(), 0);
     return 0;
 }
 
@@ -242,7 +253,10 @@ void Server::joinChannel(std::string channelName, User client)
     std::map<std::string, std::vector<User> >::iterator it = channels.find(channelName);
     
 	if (it != channels.end())
-        it->second.push_back(client);// Channel exists, add the client to the channel participants
+    {
+        it->second.push_back(client); // Channel exists, add the client to the channel participants
+        std::cout << "JOINED " << it->first << std::endl;
+    }
 	else
 	{
         // Channel doesn't exist, create a new channel and add the client
@@ -250,7 +264,7 @@ void Server::joinChannel(std::string channelName, User client)
         newChannel.push_back(client);
         channels[channelName] = newChannel;
     }
-
-//    std::string join = ":" + nick + " JOIN :" + trimMessage(buffer, 5) + "\r\n";
-//	send(clientSocket, join.c_str(), join.length(), 0);
+    std::string join = ":" + client.getNick() + " JOIN :" + channelName + "\n";
+	printStringNoP(channelName.c_str(), channelName.length());
+	send(client.getSocket(), join.c_str(), join.length(), 0);
 }
