@@ -26,6 +26,8 @@
 #include <poll.h>
 #include <netdb.h>
 #include <sstream>
+#include <map>
+#include <vector>
 
 #include "User.hpp"
 #include "Irc.hpp"
@@ -45,6 +47,7 @@ private:
 	char *IP;
 
 	User clients[MAX_CLIENTS];
+	std::map<std::string, std::vector<User>> channels;//mappa il nome del canale ad un vettore di clients che ne fanno parte
 
 	//SOCKET
 	int serverSocket;
@@ -58,6 +61,7 @@ private:
 
 	int messageToChannel(std::string buffer);
 	int messageToPrivate(std::string buffer);
+	void joinChannel(std::string channelName, User client);
 
 public:
 	Server(const int& port, const std::string& password);

@@ -25,6 +25,8 @@
 #include <errno.h>
 #include <poll.h>
 #include <algorithm>
+#include <map>
+#include <vector>
 
 #include "Irc.hpp"
 

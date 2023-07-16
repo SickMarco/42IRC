@@ -49,8 +49,3 @@ std::string User::getNick() const
 	send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
 	nick = newNick;
 } */
-
-void User::joinChannel(const char* buffer){
-	std::string join = ":" + nick + " JOIN :" + trimMessage(buffer, 5) + "\r\n";
-	send(clientSocket, join.c_str(), join.length(), 0);
-}

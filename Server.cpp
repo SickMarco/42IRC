@@ -111,8 +111,8 @@ void Server::messageHandler(User& user){
 		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
 		/* if(!strncmp(buffer, "NICK", 4))
 			user.changeNickname(buffer); */
-	 	if(!strncmp(buffer, "JOIN", 4))
-			user.joinChannel(buffer);
+	 	if(!strncmp(buffer, "JOIN #", 6))
+			joinChannel(&(buffer[6]), user);
         else if (!strncmp(buffer, "PRIVMSG ", 8))
         {
             if (buffer[8] == '#')
@@ -126,7 +126,10 @@ void Server::messageHandler(User& user){
 
 int Server::messageToChannel(std::string buffer)
 {
-    std::string channel = buffer.substr(1, buffer.find(' '));
+    std::string channelName = buffer.substr(0, buffer.find(' '));
+    std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
+
+
     return 0;
 }
 
@@ -221,4 +224,24 @@ void Server::tester()
     for (int i = 0; i < numClients; ++i) {
         close(clients[i].getSocket());
     }
+}
+
+
+void Server::joinChannel(std::string channelName, User client)
+{
+    // Check if the channel exists
+    std::map<std::string, std::vector<User>>::iterator it = channels.find(channelName);
+    
+	if (it != channels.end())
+        it->second.push_back(client);// Channel exists, add the client to the channel participants
+	else
+	{
+        // Channel doesn't exist, create a new channel and add the client
+        std::vector<User> newChannel;
+        newChannel.push_back(client);
+        channels[channelName] = newChannel;
+    }
+
+//    std::string join = ":" + nick + " JOIN :" + trimMessage(buffer, 5) + "\r\n";
+//	send(clientSocket, join.c_str(), join.length(), 0);
 }
