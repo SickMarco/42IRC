@@ -129,6 +129,15 @@ int Server::messageToChannel(std::string buffer)
     std::string channelName = buffer.substr(0, buffer.find(' '));
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
 
+    // Find the channel
+    std::map<std::string, std::vector<User>>::iterator it = channels.find(channelName);
+    if (it != channels.end())
+    {
+        // Channel exists, send the message to all clients in the channel
+        std::vector<User> channelClients = it->second;
+        for (size_t i = 0; i < channelClients.size(); ++i)
+            send(channelClients[i].getSocket(), mex.c_str(), mex.length(), 0);
+    }
 
     return 0;
 }
