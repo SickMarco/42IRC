@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 20:07:38 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/16 16:17:09 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ int Server::messageToChannel(std::string buffer)
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
 
     // Find the channel
-    std::map<std::string, std::vector<User>>::iterator it = channels.find(channelName);
+    std::map<std::string, std::vector<User> >::iterator it = channels.find(channelName);
     if (it != channels.end())
     {
         // Channel exists, send the message to all clients in the channel
@@ -239,7 +239,7 @@ void Server::tester()
 void Server::joinChannel(std::string channelName, User client)
 {
     // Check if the channel exists
-    std::map<std::string, std::vector<User>>::iterator it = channels.find(channelName);
+    std::map<std::string, std::vector<User> >::iterator it = channels.find(channelName);
     
 	if (it != channels.end())
         it->second.push_back(client);// Channel exists, add the client to the channel participants

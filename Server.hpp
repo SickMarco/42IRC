@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 20:06:12 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/16 16:16:48 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ private:
 	char *IP;
 
 	User clients[MAX_CLIENTS];
-	std::map<std::string, std::vector<User>> channels;//mappa il nome del canale ad un vettore di clients che ne fanno parte
+	std::map<std::string, std::vector<User> > channels;//mappa il nome del canale ad un vettore di clients che ne fanno parte
 
 	//SOCKET
 	int serverSocket;
@@ -59,8 +59,6 @@ private:
 	int messageToPrivate(std::string buffer);
 	int messageToChannel(std::string buffer);
 
-	int messageToChannel(std::string buffer);
-	int messageToPrivate(std::string buffer);
 	void joinChannel(std::string channelName, User client);
 
 public:
