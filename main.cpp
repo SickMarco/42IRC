@@ -6,11 +6,11 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:23:52 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/14 15:03:43 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 19:59:00 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Irc.hpp"
+#include "Server.hpp"
 
 int main(int ac, char **av)
 {

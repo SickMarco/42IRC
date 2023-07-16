@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 17:15:30 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 20:06:12 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@
 #include <netdb.h>
 #include <sstream>
 
-#include "Irc.hpp"
 #include "User.hpp"
+#include "Irc.hpp"
 
 
 #define SERVER_PORT 6667
@@ -62,9 +62,10 @@ public:
 	~Server();
 
 	void tester();
-	void printStringNoP(const char* str, std::size_t length);
 	void newClientConnected(User& user);
 	void messageHandler(User& user);
+	friend std::string trimMessage(const char* buffer, size_t startIndex);
+	friend void printStringNoP(const char* str, std::size_t length);
 };
 
 #endif

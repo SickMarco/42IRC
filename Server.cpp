@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 19:05:09 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 20:07:38 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,23 +108,13 @@ void Server::messageHandler(User& user){
 			break ;
 		}
 		buffer[bytesRead] = '\0';
+		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
 		/* if(!strncmp(buffer, "NICK", 4))
 			user.changeNickname(buffer); */
 	 	if(!strncmp(buffer, "JOIN", 4))
-		{
-			while (*buffer != ' ')
-				(*buffer)++;
 			user.joinChannel(buffer);
-		}//PRIVMSG rory :Hey Rory...
-        else if (!strncmp(buffer, "PRIVMSG ", 8))
-        {
-            if (buffer[8] == '#')
-                messageToChannel(&(buffer[8]));
-            else
-                messageToPrivate(&(buffer[8]));
-        }
-		
-        printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
+		}
+		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
 		//std::cout << bytesRead << std::endl;
 		//std::cout << buffer << std::endl;
 		std::memset(buffer, 0, sizeof(buffer));
@@ -228,16 +218,4 @@ void Server::tester()
     for (int i = 0; i < numClients; ++i) {
         close(clients[i].getSocket());
     }
-}
-
-void Server::printStringNoP(const char* str, std::size_t length) {
-    for (std::size_t i = 0; i < length; ++i) {
-        if (std::isprint(static_cast<unsigned char>(str[i]))) {
-            std::cout << str[i]  << std::flush;
-        } else {
-            std::cout << "\\x" << std::hex << static_cast<int>(str[i])  << std::flush;
-            std::cout << std::dec;
-        }
-    }
-	std::cout << std::endl << std::flush;
 }

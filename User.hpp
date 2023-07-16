@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 17:26:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 20:05:34 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 #include <errno.h>
 #include <poll.h>
 #include <algorithm>
+
+#include "Irc.hpp"
 
 class User
 {
@@ -49,6 +51,10 @@ public:
 	void setNick(char* input);
 	std::string getNick() const;
 	void joinChannel(const std::string& channel);
+	void joinChannel(const char* buffer);
+	friend std::string trimMessage(const char* buffer, size_t startIndex);
+	friend void printStringNoP(const char* str, std::size_t length);
+
 	//void changeNickname(std::string newNick);
 };
 

@@ -6,23 +6,23 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 19:01:13 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/15 19:57:29 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
 
-User::User() : clientSocket(-1), nick("") {}
+User::User() : clientSocket(-1) {}
 
 User::~User(){}
 
-void User::socketAccept(const int serverSocket){
+/* void User::socketAccept(const int serverSocket){
 	clientAddrLen = sizeof(clientAddr);
 	clientSocket = accept(serverSocket, (struct sockaddr*) &clientAddr, &clientAddrLen);
 	if (clientSocket < 0)
 		if (errno != EWOULDBLOCK && errno != EAGAIN)
 			throw std::runtime_error("Client accept error");
-}
+} */
 
 int User::getSocket() const { return this->clientSocket; }
 
@@ -31,18 +31,7 @@ void User::setSocket(const int& newSocket) { this->clientSocket = newSocket; }
 void User::setIP(char* IP){ this->ServerIP = IP; }
 
 void User::setNick(char* input) {
-	const char delimiter[] = " \n";
-
-    char* token = std::strtok(input, delimiter);
-    while (token != NULL) {
-        if (std::strcmp(token, "NICK") == 0) {
-            token = std::strtok(NULL, delimiter);
-            if (token != NULL)
-				nick = std::string(token);
-            break;
-        }
-        token = std::strtok(NULL, delimiter);
-    }
+	nick = trimMessage(input, 5);
 	std::cout << "NICKNAME : " << nick << std::endl;
 }
 
@@ -61,7 +50,7 @@ std::string User::getNick() const
 	nick = newNick;
 } */
 
-void User::joinChannel(const std::string& channel){
-	std::string join = ":" + nick + "!" + host + "@" + ServerIP + " JOIN :" + channel + "\r\n";
+void User::joinChannel(const char* buffer){
+	std::string join = ":" + nick + " JOIN :" + trimMessage(buffer, 5) + "\r\n";
 	send(clientSocket, join.c_str(), join.length(), 0);
 }
