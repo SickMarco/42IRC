@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 20:05:34 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 18:05:13 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ private:
 	socklen_t clientAddrLen;
 	int clientSocket;
 	std::string nick;
-	std::string realname;
+	std::string user;
 
 	std::string host;
 	char *ServerIP;
@@ -47,14 +47,16 @@ public:
 	~User();
 	bool operator==(const User& other) const {return (clientSocket == other.clientSocket);}
 
-	void socketAccept(const int serverSocket);
 	int getSocket() const;
 	void setSocket(const int& newSocket);
 	void setIP(char* IP);
-	void setNick(char* input);
+
+	std::string getUser() const;
 	std::string getNick() const;
-	void joinChannel(const std::string& channel);
-	void joinChannel(const char* buffer);
+
+	void setNick(char* input);
+	void setUser(char* newUser);
+
 	friend std::string trimMessage(const char* buffer, size_t startIndex);
 	friend void printStringNoP(const char* str, std::size_t length);
 

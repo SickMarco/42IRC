@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/16 20:01:28 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 18:44:53 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,10 @@ void printStringNoP(const char* str, std::size_t length) {
         }
     }
 	std::cout << std::endl << std::flush;
+}
+
+std::string removeCRLF(const char* buffer){
+    std::string input = buffer;
+	std::string ret = input.substr(0, input.length() - 1);
+    return ret;
 }

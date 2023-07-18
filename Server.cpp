@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 17:32:05 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 19:18:56 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), port(p) , serverPassword("ktm"), userPassword(pass){
+Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), serverPassword("ktm"), userPassword(pass), port(p){
 	if (port != SERVER_PORT)
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
@@ -24,12 +24,6 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), po
 
 Server::~Server(){
 	close(serverSocket);
-}
-
-std::string removeCRLF(const char* buffer){
-    std::string input = buffer;
-	std::string ret = input.substr(0, input.length() - 1);
-    return ret;
 }
 
 /**
@@ -78,16 +72,13 @@ void Server::getMyIP(){
 
 void Server::newClientConnected(User& user){
 	user.setIP(IP);
-	for (int i = 0; i < 4; ++i){
+	for (int i = 0; i < 5; ++i) {
 		char buffer[1024];
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		buffer[bytesRead] = '\0';
-		if (!strncmp(buffer, "NICK", 4))
-		{
-            for (size_t i = 0; i < MAX_CLIENTS; ++i)
-            {
-                if (clients[i].getNick() == trimMessage(buffer, 5))
-                {
+		if (!strncmp(buffer, "NICK", 4)) {
+            for (size_t i = 0; i < MAX_CLIENTS; ++i) {
+                if (clients[i].getNick() == trimMessage(buffer, 5)) {
                     std::string nameUsed = serverName + " 433 * " + clients[i].getNick() + " :Nickname is already in use\r\n";
                     send(user.getSocket(), nameUsed.c_str(),nameUsed.length(), 0);
                     return ;
@@ -96,13 +87,14 @@ void Server::newClientConnected(User& user){
 			user.setNick(buffer);
 			std::memset(buffer, 0, sizeof(buffer));
 		}
+        else if (!strncmp(buffer, "USER", 4)) {
+            user.setUser(std::strtok(&buffer[5], " "));
+            break;
+        }
 	}
-    std::string welcomeMsg = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "!" + user.getNick() + "@" + IP + "\r\n";
-    printStringNoP(welcomeMsg.c_str(), welcomeMsg.length());
-    if (send(user.getSocket(), welcomeMsg.c_str(), strlen(welcomeMsg.c_str()), 0) < 0) {
-		perror("Send error");
-		close(user.getSocket());
-	}
+    std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "!" + user.getUser() + "@" + hostname + "\r\n";
+    printStringNoP(RPL_WELCOME.c_str(), RPL_WELCOME.length());
+    send(user.getSocket(), RPL_WELCOME.c_str(), strlen(RPL_WELCOME.c_str()), 0);
 }
 
 void Server::messageHandler(User& user){
@@ -123,17 +115,20 @@ void Server::messageHandler(User& user){
 			user.changeNickname(buffer); */
 	 	if(!strncmp(buffer, "JOIN #", 6))
 			joinChannel(removeCRLF(&(buffer[6])), user);
+        else if (!strncmp(buffer, "PRIVMSG #", 9))
+            messageToChannel(user, removeCRLF(&(buffer[8])));
         else if (!strncmp(buffer, "PRIVMSG ", 8))
             messageToPrivate(user, removeCRLF(&(buffer[8])));
         else if (!strncmp(buffer, "PART ", 5))
         {
+            std::cout << "BUFFER: " << buffer << std::endl;
             std::string buf = removeCRLF(&(buffer[5]));
             
             std::string token = std::strtok(&(buf[0]), ","); 
             while (!token.empty())
             {
                 leaveChannel(&(token[1]), user);
-                std::string token = std::strtok(&(buf[0]), ","); 
+              std::string token = std::strtok(&(buf[0]), ","); 
             }
         }
 		std::memset(buffer, 0, sizeof(buffer));
@@ -141,22 +136,17 @@ void Server::messageHandler(User& user){
 
 int Server::messageToPrivate(User& user, std::string buffer)
 {
-    if (messageToChannel(user, buffer))
-        return 0;
     std::string name = buffer.substr(0, buffer.find(' '));
     std::string mex = buffer.substr(name.length() + 1, std::string::npos);
 
     int clientSocket = -1;
     size_t i;
-    for (i = 0; i < MAX_CLIENTS; i++)
-    {
-        if (clients[i].getNick() == name)
-        {
+    for (i = 0; i < MAX_CLIENTS; i++) {
+        if (clients[i].getNick() == name) {
             clientSocket = clients[i].getSocket();
             break;
         }
     }
-    //std::string privmsg = ":" + user.getNick() + "!" + hostname + "@" + IP + " PRIVMSG " + name + " " + mex.substr(0, mex.length() - 1) + "\r\n";
     std::string privmsg = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
     send(clientSocket,  privmsg.c_str(),  privmsg.length(), 0);
     return 0;
@@ -164,18 +154,13 @@ int Server::messageToPrivate(User& user, std::string buffer)
 
 void Server::tester()
 {
-    // Inizializza l'array di client
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        clients[i].setSocket(-1); // Resetta lo stato di ogni client
-    }
-
+    for (int i = 0; i < MAX_CLIENTS; ++i)
+        clients[i].setSocket(-1);
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
     fds[0].fd = serverSocket;
     fds[0].events = POLLIN;
-
     int numClients = 0; // Numero attuale di client connessi
-
     while (1) {
         int ret = poll(fds, numClients + 1, 1000);
         if (ret < 0) {
@@ -186,7 +171,6 @@ void Server::tester()
         } else if (ret == 0) {
             continue;
         }
-
         // Controlla se ci sono nuove connessioni
         if (fds[0].revents & POLLIN) {
             int clientSocket = accept(serverSocket, NULL, NULL);
@@ -194,7 +178,6 @@ void Server::tester()
                 perror("Accept error");
                 continue;
             }
-
             // Aggiungi il nuovo client all'array
             if (numClients < MAX_CLIENTS) {
                 int i;
@@ -217,7 +200,6 @@ void Server::tester()
                 close(clientSocket);
             }
         }
-
         // Controlla se ci sono dati in arrivo dai client esistenti
         for (int i = 0; i < numClients; ++i) {
             if (fds[i + 1].revents & POLLIN) {
@@ -225,7 +207,6 @@ void Server::tester()
             }
         }
     }
-
     // Chiudi tutte le connessioni client
     for (int i = 0; i < numClients; ++i) {
         close(clients[i].getSocket());
