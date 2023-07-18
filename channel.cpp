@@ -83,3 +83,16 @@ int Server::messageToChannel(User& user, std::string buffer)
         std::cout << "CHANNEL NOT FOUND" << std::endl;
     return 0;
 }
+
+void Server::leaveChannel(std::string channelName, User client)
+{
+    // Check if the channel exists
+    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    
+    if (it != channels.end())
+    {
+        // Channel exists, remove the client from the channel participants
+        std::vector<User>& channelClients = it->second.clients;
+        channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client.getSocket()), channelClients.end());
+    }
+}
