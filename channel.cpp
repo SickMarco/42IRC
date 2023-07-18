@@ -12,7 +12,7 @@
 
 #include "Server.hpp"
 
-void Server::joinChannel(std::string channelName, User client)
+void Server::joinChannel(std::string channelName, User &client)
 {
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
 	if (it != channels.end())
@@ -84,7 +84,7 @@ int Server::messageToChannel(User& user, std::string buffer)
     return 0;
 }
 
-void Server::leaveChannel(std::string channelName, User client)
+void Server::leaveChannel(std::string channelName, User &client)
 {
     // Check if the channel exists
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
@@ -92,7 +92,7 @@ void Server::leaveChannel(std::string channelName, User client)
     if (it != channels.end())
     {
         // Channel exists, remove the client from the channel participants
-        std::vector<User>& channelClients = it->second.clients;
-        channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client.getSocket()), channelClients.end());
+        std::vector<User> & channelClients = it->second.clients;
+        channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client), channelClients.end());
     }
 }

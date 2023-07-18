@@ -28,6 +28,7 @@
 #include <sstream>
 #include <map>
 #include <vector>
+#include <algorithm>
 
 #include "User.hpp"
 #include "Irc.hpp"
@@ -65,8 +66,8 @@ private:
 	int messageToPrivate(User& user, std::string buffer);
 	int messageToChannel(User& user, std::string buffer);
 
-	void joinChannel(std::string channelName, User& client);
-	void leaveChannel(std::string channelName, User client);
+	void joinChannel(std::string channelName, User &client);
+	void leaveChannel(std::string channelName, User &client);
 
 public:
 	Server(const int& port, const std::string& password);

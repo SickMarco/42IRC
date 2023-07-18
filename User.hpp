@@ -45,6 +45,7 @@ private:
 public:
 	User();
 	~User();
+	bool operator==(const User& other) const {return (clientSocket == other.clientSocket);}
 
 	void socketAccept(const int serverSocket);
 	int getSocket() const;
