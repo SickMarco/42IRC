@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/17 20:21:23 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 15:53:30 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(const int& p, const std::string& pass) : port(p), serverPassword("ktm") , userPassword(pass){
+Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), port(p) , serverPassword("ktm"), userPassword(pass){
 	if (port != SERVER_PORT)
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
@@ -78,20 +78,29 @@ void Server::getMyIP(){
 
 void Server::newClientConnected(User& user){
 	user.setIP(IP);
-	std::string welcomeMsg = "Benvenuto nel server IRC!\r\n";
-	if (send(user.getSocket(), welcomeMsg.c_str(), strlen(welcomeMsg.c_str()), 0) < 0) {
-		perror("Send error");
-		close(user.getSocket());
-	}
 	for (int i = 0; i < 4; ++i){
 		char buffer[1024];
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		buffer[bytesRead] = '\0';
 		if (!strncmp(buffer, "NICK", 4))
 		{
+            for (size_t i = 0; i < MAX_CLIENTS; ++i)
+            {
+                if (clients[i].getNick() == trimMessage(buffer, 5))
+                {
+                    std::string nameUsed = serverName + " 433 * " + clients[i].getNick() + " :Nickname is already in use\r\n";
+                    return ;
+                }
+            }
 			user.setNick(buffer);
 			std::memset(buffer, 0, sizeof(buffer));
 		}
+	}
+    std::string welcomeMsg = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "!" + user.getNick() + "@" + IP + "\r\n";
+    printStringNoP(welcomeMsg.c_str(), welcomeMsg.length());
+    if (send(user.getSocket(), welcomeMsg.c_str(), strlen(welcomeMsg.c_str()), 0) < 0) {
+		perror("Send error");
+		close(user.getSocket());
 	}
 }
 

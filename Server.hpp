@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/16 19:31:36 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 15:33:46 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Server
 {
 private:
 	//SERVER INIT
+	const std::string serverName;
 	const int port;
 	const std::string serverPassword;
 	std::string userPassword;
