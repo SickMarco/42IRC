@@ -67,7 +67,7 @@ private:
 	int messageToChannel(User& user, std::string buffer);
 
 	void joinChannel(std::string channelName, User &client);
-	void leaveChannel(std::string channelName, User &client);
+	void leaveChannel(std::string channelName, User &client, std::string message);
 
 	void newClientConnected(User& user);
 	void messageHandler(User& user);

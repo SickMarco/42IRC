@@ -121,15 +121,10 @@ void Server::messageHandler(User& user){
             messageToPrivate(user, removeCRLF(&(buffer[8])));
         else if (!strncmp(buffer, "PART ", 5))
         {
-            std::cout << "BUFFER: " << buffer << std::endl;
+            //std::cout << "BUFFER: " << buffer << std::endl;
             std::string buf = removeCRLF(&(buffer[5]));
-            
-            std::string token = std::strtok(&(buf[0]), ","); 
-            while (!token.empty())
-            {
-                leaveChannel(&(token[1]), user);
-              std::string token = std::strtok(&(buf[0]), ","); 
-            }
+            std::string token = std::strtok(&(buf[0]), " ");
+            leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
         }
 		std::memset(buffer, 0, sizeof(buffer));
 }

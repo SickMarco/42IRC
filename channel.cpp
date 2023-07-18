@@ -66,17 +66,23 @@ int Server::messageToChannel(User& user, std::string buffer)
     return 0;
 }
 
-void Server::leaveChannel(std::string channelName, User& client)
+void Server::leaveChannel(std::string channelName, User& client, std::string message)
 {
     // Check if the channel exists
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
     
-    if (it != channels.end()) {
+    if (it != channels.end())
+    {    
+        std::string PART = serverName + " " + client.getNick() + "!" + client.getUser() + "@" + hostname + " PART #" + channelName + " " + message + "\r\n";
+        printStringNoP(PART.c_str(), PART.length());
+        //notify all channel participants
+        std::vector<User>::iterator itc = it->second.clients.begin();
+        for (; itc != it->second.clients.end(); ++itc)
+            send(itc->getSocket(), PART.c_str(), PART.length(), 0);
+        
         // Channel exists, remove the client from the channel participants
         std::vector<User> & channelClients = it->second.clients;
         channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client), channelClients.end());
     }
-    std::string PART = serverName + " " + client.getNick() + "!" + client.getUser() + "@" + hostname + " PART #" + channelName + " :Leave the channel\r\n";
-    send(client.getSocket(), PART.c_str(), PART.length(), 0);
-    printStringNoP(PART.c_str(), PART.length());
+    
 }
