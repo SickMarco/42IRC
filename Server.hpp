@@ -36,6 +36,11 @@
 #define SERVER_PORT 6667
 #define MAX_CLIENTS 100
 
+struct Channel {
+	std::string topic;
+	std::vector<User> clients;
+};
+
 class Server
 {
 private:
@@ -48,7 +53,7 @@ private:
 	char *IP;
 
 	User clients[MAX_CLIENTS];
-	std::map<std::string, std::vector<User> > channels;//mappa il nome del canale ad un vettore di clients che ne fanno parte
+	std::map<std::string, Channel > channels;//mappa il nome del canale ad un vettore di clients che ne fanno parte
 
 	//SOCKET
 	int serverSocket;
