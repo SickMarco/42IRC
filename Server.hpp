@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 17:28:45 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/18 17:57:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,8 @@ private:
 	int messageToPrivate(User& user, std::string buffer);
 	int messageToChannel(User& user, std::string buffer);
 
-	void joinChannel(std::string channelName, User client);
+	void joinChannel(std::string channelName, User& client);
+	void leaveChannel(std::string channelName, User client);
 
 public:
 	Server(const int& port, const std::string& password);
