@@ -125,6 +125,17 @@ void Server::messageHandler(User& user){
 			joinChannel(removeCRLF(&(buffer[6])), user);
         else if (!strncmp(buffer, "PRIVMSG ", 8))
             messageToPrivate(user, removeCRLF(&(buffer[8])));
+        else if (!strncmp(buffer, "PART ", 5))
+        {
+            std::string buf = removeCRLF(&(buffer[5]));
+            
+            std::string token = std::strtok(&(buf[0]), ","); 
+            while (!token.empty())
+            {
+                leaveChannel(&(token[1]), user);
+                std::string token = std::strtok(&(buf[0]), ","); 
+            }
+        }
 		std::memset(buffer, 0, sizeof(buffer));
 }
 
