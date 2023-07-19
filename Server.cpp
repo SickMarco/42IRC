@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 15:17:38 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 17:30:16 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), serverPassword("ktm"), userPassword(pass), port(p){
+Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), serverPassword("ktm"), userPassword(pass), port(p) , isServerRunning(true){
 	if (port != SERVER_PORT)
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
@@ -146,10 +146,10 @@ void Server::newClientHandler(struct pollfd* fds, int& numClients) {
 void Server::run(){
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
+    memset(fds, 0, sizeof(fds));
     fds[0].fd = serverSocket;
     fds[0].events = POLLIN;
     int numClients = 0; // Numero attuale di client connessi
-
     while (1) 
     {
         int ret = poll(fds, numClients + 1, 1000);
@@ -165,7 +165,11 @@ void Server::run(){
         for (int i = 0; i < numClients; ++i)
             if (fds[i + 1].revents & POLLIN)
                 messageHandler(clients[i]);
+        if (!isServerRunning)
+            break;
     }
-    for (int i = 0; i < numClients; ++i)         // Chiudi tutte le connessioni client
-        close(clients[i].getSocket());
+    for (int i = 0; i < numClients; ++i) {
+        if (clients[i].getSocket() > 0)
+            close(clients[i].getSocket());
+    }
 }

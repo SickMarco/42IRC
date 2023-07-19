@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 15:07:34 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:35:44 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ void Server::messageHandler(User& user){
 
             close(user.getSocket());
             user.setSocket(-1);
+			if (!strncmp(&buffer[6], "ragequit", 8))
+				isServerRunning = false;
             std::vector <std::string> ::iterator it = user.channelsJoined.begin();
             std::vector <User> ccv;
             for (; it != user.channelsJoined.end(); ++it)

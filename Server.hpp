@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 15:04:20 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:34:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ private:
 	const int port;
 	char hostname[256];
 	char *IP;
+	bool isServerRunning;
 
 	std::vector<User> clients;
 	std::map<std::string, Channel > channels;	//mappa il nome del canale ad un vettore di clients che ne fanno parte
