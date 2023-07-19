@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 19:18:56 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 13:21:05 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,8 +126,15 @@ void Server::messageHandler(User& user){
             std::string token = std::strtok(&(buf[0]), " ");
             leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
         }
+        else if (!strncmp(buffer, "PING", 4))
+        {
+            std::string PONG = "PONG " + std::string(std::strtok(&buffer[5], "\n")) + "\r\n";
+            send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
+        }
         else if (!strncmp(buffer, "QUIT", 4))
         {
+            close(user.getSocket());
+            user.setSocket(-1);
             std::vector <std::string> ::iterator it = user.channelsJoined.begin();
             std::vector <User> ccv;
             for (; it != user.channelsJoined.end(); ++it)
@@ -156,6 +163,7 @@ int Server::messageToPrivate(User& user, std::string buffer)
         }
     }
     std::string privmsg = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
+    send(user.getSocket(),  privmsg.c_str(),  privmsg.length(), 0);
     send(clientSocket,  privmsg.c_str(),  privmsg.length(), 0);
     return 0;
 }

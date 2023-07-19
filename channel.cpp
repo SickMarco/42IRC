@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 19:09:02 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 14:02:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ void Server::joinChannel(std::string channelName, User &client)
         ((itUSer + 1) != it->second.clients.end()) ? RPL_NAMREPLY += " " : RPL_NAMREPLY += "\r\n";
     }
 
-    send(client.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
+    if (!it->second.topic.empty())
+		send(client.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
     send(client.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
     send(client.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
 }
@@ -84,7 +85,6 @@ void Server::leaveChannel(std::string channelName, User& client, std::string mes
         // Channel exists, remove the client from the channel participants
         std::vector<User> & channelClients = it->second.clients;
         channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client), channelClients.end());
-
         // Update client channel list
         client.channelsJoined.erase(std::remove(client.channelsJoined.begin(), client.channelsJoined.end(), channelName), client.channelsJoined.end());
     }
