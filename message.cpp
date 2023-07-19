@@ -47,25 +47,14 @@ void Server::messageHandler(User& user){
             send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
         }
         else if (!strncmp(buffer, "QUIT", 4))
+            quit(buffer, user);
+        else if (!strncmp(buffer, "NICK", 4))
         {
-            std::string buf = buffer;
-            std::vector <User> ::iterator it2 = clients.begin();
-            std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
-            for (; it2 != clients.end(); ++it2)
-                send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+            
+        }
+        else if (!strncmp(buffer, "USER", 4))
+        {
 
-            close(user.getSocket());
-            user.setSocket(-1);
-			if (!strncmp(&buffer[6], "ragequit", 8))
-				isServerRunning = false;
-            std::vector <std::string> ::iterator it = user.channelsJoined.begin();
-            std::vector <User> ccv;
-            for (; it != user.channelsJoined.end(); ++it)
-            {
-                ccv =  channels[*it].clients;
-                ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
-            }
-            clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
         }
 		std::memset(buffer, 0, sizeof(buffer));
 }
@@ -116,4 +105,26 @@ int Server::messageToChannel(User& user, std::string buffer)
         return 1;
     }
     return 0;
+}
+
+void Server::quit(char * buffer, User &user)
+{
+    std::string buf = buffer;
+    std::vector <User> ::iterator it2 = clients.begin();
+    std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
+    for (; it2 != clients.end(); ++it2)
+        send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+
+    close(user.getSocket());
+    user.setSocket(-1);
+	if (!strncmp(&buffer[6], "ragequit", 8))
+		isServerRunning = false;
+    std::vector <std::string> ::iterator it = user.channelsJoined.begin();
+    std::vector <User> ccv;
+    for (; it != user.channelsJoined.end(); ++it)
+    {
+        ccv =  channels[*it].clients;
+        ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
+    }
+    clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
 }
