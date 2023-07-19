@@ -134,10 +134,12 @@ void Server::changeNick(std::string buffer, User &user)
     for (; it != clients.end(); it++)
     {
         if (buffer == it->getNick())
-            return ;//send Nickname already taken and than return
+            return ;//send Nickname already taken and than return 
+            //:oldnick!user@host NICK :newnick
     }
 
     std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";
+    std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + buffer + "\r\n";
     std::cout << nickmsg;
     //search in channels and change nick
     std::vector <std::string> ::iterator it2 = user.channelsJoined.begin();
@@ -152,5 +154,8 @@ void Server::changeNick(std::string buffer, User &user)
     user.setNick(&(buffer[0]));//set new nickname
     it = clients.begin();
     for (; it != clients.end(); it++)
+    {
         send(it->getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
+        send(it->getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);
+    }
 }
