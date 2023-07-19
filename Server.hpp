@@ -53,7 +53,7 @@ private:
 	char hostname[256];
 	char *IP;
 
-	User clients[MAX_CLIENTS];
+	std::vector<User> clients;
 	std::map<std::string, Channel > channels;	//mappa il nome del canale ad un vettore di clients che ne fanno parte
 
 	//SOCKET

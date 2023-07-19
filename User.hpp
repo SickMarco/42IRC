@@ -41,6 +41,7 @@ private:
 
 	std::string host;
 	char *ServerIP;
+	
 
 public:
 	User();
@@ -59,7 +60,8 @@ public:
 
 	friend std::string trimMessage(const char* buffer, size_t startIndex);
 	friend void printStringNoP(const char* str, std::size_t length);
-
+	
+	std::vector <std::string> channelsJoined;
 	//void changeNickname(std::string newNick);
 };
 

@@ -126,6 +126,17 @@ void Server::messageHandler(User& user){
             std::string token = std::strtok(&(buf[0]), " ");
             leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
         }
+        else if (!strncmp(buffer, "QUIT", 4))
+        {
+            std::vector <std::string> ::iterator it = user.channelsJoined.begin();
+            std::vector <User> ccv;
+            for (; it != user.channelsJoined.end(); ++it)
+            {
+                ccv =  channels[*it].clients;
+                ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
+            }
+            clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
+        }
 		std::memset(buffer, 0, sizeof(buffer));
 }
 
@@ -135,10 +146,12 @@ int Server::messageToPrivate(User& user, std::string buffer)
     std::string mex = buffer.substr(name.length() + 1, std::string::npos);
 
     int clientSocket = -1;
-    size_t i;
-    for (i = 0; i < MAX_CLIENTS; i++) {
-        if (clients[i].getNick() == name) {
-            clientSocket = clients[i].getSocket();
+    std::vector<User> ::iterator it = clients.begin();
+    for (; it != clients.end(); it++)
+    {
+        if (it->getNick() == name)
+        {
+            clientSocket = it->getSocket();
             break;
         }
     }
@@ -150,7 +163,11 @@ int Server::messageToPrivate(User& user, std::string buffer)
 void Server::tester()
 {
     for (int i = 0; i < MAX_CLIENTS; ++i)
-        clients[i].setSocket(-1);
+    {
+        User cl;
+        cl.setSocket(-1);
+        clients.push_back(cl);
+    }
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
     fds[0].fd = serverSocket;

@@ -22,6 +22,7 @@ void Server::joinChannel(std::string channelName, User &client)
         newChannel.clients.push_back(client);
         channels[channelName] = newChannel;
     }
+    client.channelsJoined.push_back(channelName);
     // JOIN MESSAGE SEQUENCE
     std::string join = ":" + client.getNick() + "!" + client.getNick() + "@" +  std::string(IP) + " JOIN #" + channelName + "\r\n";
     std::string RPL_TOPIC = ":" + std::string(IP) + " 332 " + client.getNick() + " #" + channelName + " :" + "\r\n";
@@ -83,6 +84,9 @@ void Server::leaveChannel(std::string channelName, User& client, std::string mes
         // Channel exists, remove the client from the channel participants
         std::vector<User> & channelClients = it->second.clients;
         channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client), channelClients.end());
+
+        // Update client channel list
+        client.channelsJoined.erase(std::remove(client.channelsJoined.begin(), client.channelsJoined.end(), channelName), client.channelsJoined.end());
     }
     
 }
