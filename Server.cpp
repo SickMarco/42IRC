@@ -76,16 +76,25 @@ void Server::getMyIP(){
     IP = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
 }
 
-void Server::newClientConnected(User& user){
+void Server::newClientConnected(User& user)
+{
 	user.setIP(IP);
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 5; ++i)
+    {
 		char buffer[1024];
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		buffer[bytesRead] = '\0';
-		if (!strncmp(buffer, "NICK", 4)) {
-            for (size_t i = 0; i < MAX_CLIENTS; ++i) {
-                if (clients[i].getNick() == trimMessage(buffer, 5)) {
-                    std::string nameUsed = serverName + " 433 * " + clients[i].getNick() + " :Nickname is already in use\r\n";
+		if (!strncmp(buffer, "NICK", 4))
+        {
+        //    std::cout << "Nick buf '" << buffer << "'" << std::endl;
+            std::vector <User> ::iterator it = clients.begin();
+            for (; it != clients.end(); ++it)
+            {   
+            //    if (it->getNick() != "")
+            //        std::cout << "Cl nick '" << it->getNick() << "'" << std::endl;
+                if (it->getNick() == trimMessage(buffer, 5))
+                {
+                    std::string nameUsed = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
                     send(user.getSocket(), nameUsed.c_str(),nameUsed.length(), 0);
                     return ;
                 }
@@ -93,7 +102,8 @@ void Server::newClientConnected(User& user){
 			user.setNick(buffer);
 			std::memset(buffer, 0, sizeof(buffer));
 		}
-        else if (!strncmp(buffer, "USER", 4)) {
+        else if (!strncmp(buffer, "USER", 4))
+        {
             user.setUser(std::strtok(&buffer[5], " "));
             break;
         }
@@ -133,7 +143,7 @@ void Server::newClientHandler(struct pollfd* fds, int& numClients) {
     }
 }
 
-void Server::run() {
+void Server::run(){
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
     fds[0].fd = serverSocket;
