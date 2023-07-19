@@ -74,6 +74,7 @@ private:
 	void newClientConnected(User& user);
 	void messageHandler(User& user);
 	void quit(char * buffer, User &user);
+	void changeNick(std::string buffer, User &user);
 
 public:
 	Server(const int& port, const std::string& password);

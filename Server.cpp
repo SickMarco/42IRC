@@ -99,7 +99,7 @@ void Server::newClientConnected(User& user)
                     return ;
                 }
             }
-			user.setNick(buffer);
+			user.setNick(&((trimMessage(buffer, 5))[0]));
 			std::memset(buffer, 0, sizeof(buffer));
 		}
         else if (!strncmp(buffer, "USER", 4))

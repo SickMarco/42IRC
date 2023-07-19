@@ -22,7 +22,7 @@ void User::setSocket(const int& newSocket) { this->clientSocket = newSocket; }
 
 void User::setIP(char* IP){ this->ServerIP = IP; }
 
-void User::setNick(char* input) { nick = trimMessage(input, 5); }
+void User::setNick(char* input) { nick = input; }
 
 void User::setUser(char* newUser) { this->user = newUser; }
 

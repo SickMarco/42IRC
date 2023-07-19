@@ -46,12 +46,10 @@ void Server::messageHandler(User& user){
             std::string PONG = "PONG " + std::string(std::strtok(&buffer[5], "\n")) + "\r\n";
             send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
         }
-        else if (!strncmp(buffer, "QUIT", 4))
+        else if (!strncmp(buffer, "QUIT ", 5))
             quit(buffer, user);
-        else if (!strncmp(buffer, "NICK", 4))
-        {
-            
-        }
+        else if (!strncmp(buffer, "NICK ", 5))
+            changeNick(&(buffer[5]), user);
         else if (!strncmp(buffer, "USER", 4))
         {
 
@@ -127,4 +125,32 @@ void Server::quit(char * buffer, User &user)
         ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
     }
     clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
+}
+
+void Server::changeNick(std::string buffer, User &user)
+{
+    buffer = buffer.substr(0, buffer.length() - 1);
+    std::vector <User> ::iterator it = clients.begin();
+    for (; it != clients.end(); it++)
+    {
+        if (buffer == it->getNick())
+            return ;//send Nickname already taken and than return
+    }
+
+    std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";
+    std::cout << nickmsg;
+    //search in channels and change nick
+    std::vector <std::string> ::iterator it2 = user.channelsJoined.begin();
+    for (; it2 != user.channelsJoined.end(); it2++)
+    {
+        std::vector <User> ::iterator it3;
+        it3 = std::find(channels[*it2].clients.begin(), channels[*it2].clients.end(), user);
+        if (it3 != channels[*it2].clients.end())
+            it3->setNick(&(buffer[0]));
+    }
+
+    user.setNick(&(buffer[0]));//set new nickname
+    it = clients.begin();
+    for (; it != clients.end(); it++)
+        send(it->getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
 }
