@@ -48,8 +48,9 @@ void Server::messageHandler(User& user){
         }
         else if (!strncmp(buffer, "QUIT", 4))
         {
+            std::string buf = buffer;
             std::vector <User> ::iterator it2 = clients.begin();
-            std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT :Quit: Adios\r\n";
+            std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
             for (; it2 != clients.end(); ++it2)
                 send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
 
