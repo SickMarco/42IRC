@@ -48,6 +48,11 @@ void Server::messageHandler(User& user){
         }
         else if (!strncmp(buffer, "QUIT", 4))
         {
+            std::vector <User> ::iterator it2 = clients.begin();
+            std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT :Quit: Adios\r\n";
+            for (; it2 != clients.end(); ++it2)
+                send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+
             close(user.getSocket());
             user.setSocket(-1);
             std::vector <std::string> ::iterator it = user.channelsJoined.begin();
