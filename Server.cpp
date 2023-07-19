@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 17:30:16 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 19:07:46 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ void Server::socketInit(){
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(IP);
-	std::cout << IP << std::endl;
-	std::cout << hostname << std::endl;
+	std::cout << "SERVER IP: " << IP << std::endl;
     //controlla puliza serverAddr
 }
 
@@ -86,37 +85,39 @@ void Server::newClientConnected(User& user)
 		buffer[bytesRead] = '\0';
 		if (!strncmp(buffer, "NICK", 4))
         {
-        //    std::cout << "Nick buf '" << buffer << "'" << std::endl;
             std::vector <User> ::iterator it = clients.begin();
-            for (; it != clients.end(); ++it)
-            {   
-            //    if (it->getNick() != "")
-            //        std::cout << "Cl nick '" << it->getNick() << "'" << std::endl;
-                if (it->getNick() == trimMessage(buffer, 5))
-                {
-                    std::string nameUsed = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
-                    send(user.getSocket(), nameUsed.c_str(),nameUsed.length(), 0);
+            for (; it != clients.end(); ++it) {   
+                if (it->getNick() == trimMessage(buffer, 5)) {
+                    std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
+                    send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
                     return ;
                 }
             }
 			user.setNick(buffer);
 			std::memset(buffer, 0, sizeof(buffer));
 		}
-        else if (!strncmp(buffer, "USER", 4))
-        {
+        else if (!strncmp(buffer, "USER", 4)) {
             user.setUser(std::strtok(&buffer[5], " "));
             break;
         }
 	}
-    std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "!" + user.getUser() + "@" + hostname + "\r\n";
-    printStringNoP(RPL_WELCOME.c_str(), RPL_WELCOME.length());
-    send(user.getSocket(), RPL_WELCOME.c_str(), strlen(RPL_WELCOME.c_str()), 0);
+    std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "\r\n";
+    std::string RPL_YOURHOST = serverName + " 002 " + user.getNick() + " :Hosted by Frat Carnal, running version 0.42\r\n";
+    std::string RPL_CREATED = serverName + " 003 " + user.getNick() + " :This server was created on 2023/07/19\r\n";
+    std::string RPL_MOTD = serverName + " 372 " + user.getNick() + " :- Welcome to the most ludro IRC server ever -\r\n";
+    std::string RPL_ENDOFMOTD = serverName + " 376 " + user.getNick() + " :End of MOTD command\r\n";
+    send(user.getSocket(), RPL_WELCOME.c_str(), RPL_WELCOME.length(), 0);
+    send(user.getSocket(), RPL_YOURHOST.c_str(), RPL_YOURHOST.length(), 0);
+    send(user.getSocket(), RPL_CREATED.c_str(), RPL_CREATED.length(), 0);
+    send(user.getSocket(), RPL_MOTD.c_str(), RPL_MOTD.length(), 0);
+    send(user.getSocket(), RPL_ENDOFMOTD.c_str(), RPL_ENDOFMOTD.length(), 0);
 }
 
 void Server::newClientHandler(struct pollfd* fds, int& numClients) {
-    if (fds[0].revents & POLLIN) {
+    if (fds[0].revents & POLLIN)
+    {
         int clientSocket = accept(serverSocket, NULL, NULL);
-        if (clientSocket < 0) {
+        if (clientSocket < 0){
             perror("Accept error");
             return;
         }
@@ -143,7 +144,7 @@ void Server::newClientHandler(struct pollfd* fds, int& numClients) {
     }
 }
 
-void Server::run(){
+void Server::run() {
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
     memset(fds, 0, sizeof(fds));
@@ -168,8 +169,7 @@ void Server::run(){
         if (!isServerRunning)
             break;
     }
-    for (int i = 0; i < numClients; ++i) {
+    for (int i = 0; i < numClients; ++i)
         if (clients[i].getSocket() > 0)
             close(clients[i].getSocket());
-    }
 }
