@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 13:21:05 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 14:21:39 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,9 +162,15 @@ int Server::messageToPrivate(User& user, std::string buffer)
             break;
         }
     }
-    std::string privmsg = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
-    send(user.getSocket(),  privmsg.c_str(),  privmsg.length(), 0);
-    send(clientSocket,  privmsg.c_str(),  privmsg.length(), 0);
+    std::string PRIVMSG = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
+
+    bool sentToDest = false;
+    if (user.getNick() != name) {
+        send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
+        sentToDest = true;
+    }
+    if (!sentToDest)
+        send(user.getSocket(), PRIVMSG.c_str(), PRIVMSG.length(), 0);
     return 0;
 }
 
