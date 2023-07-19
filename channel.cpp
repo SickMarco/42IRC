@@ -75,7 +75,7 @@ void Server::leaveChannel(std::string channelName, User& client, std::string mes
     (void )message;
     if (it != channels.end())
     {
-        std::string PART = ":" + client.getNick() + "!" + client.getUser() + "@" + hostname +" PART :#" + channelName + "\n";
+        std::string PART = ":" + client.getNick() + "!" + client.getUser() + "@" + hostname +" PART :#" + channelName + "\r\n";
         printStringNoP(PART.c_str(), PART.length());
         //notify all channel participants
         std::vector<User>::iterator itc = it->second.clients.begin();
