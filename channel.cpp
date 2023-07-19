@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 14:02:54 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:07:30 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,27 +45,6 @@ void Server::joinChannel(std::string channelName, User &client)
 		send(client.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
     send(client.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
     send(client.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
-}
-
-int Server::messageToChannel(User& user, std::string buffer)
-{
-    std::string channelName = buffer.substr(1, buffer.find(' '));
-    channelName = channelName.substr(0, channelName.length() - 1);
-    std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
-
-    // Find the channel
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    if (it != channels.end()) {
-        std::vector<User> channelClients = it->second.clients;
-        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex.substr(0, mex.length()) + "\r\n";
-
-        for (size_t i = 0; i < channelClients.size(); ++i) {
-            if (channelClients[i].getSocket() != -1 && channelClients[i].getSocket() != user.getSocket())
-                send(channelClients[i].getSocket(), privmsg.c_str(), privmsg.length(), 0);
-        }
-        return 1;
-    }
-    return 0;
 }
 
 void Server::leaveChannel(std::string channelName, User& client, std::string message)

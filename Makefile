@@ -1,6 +1,6 @@
 NAME = ircserv
 
-SRC = main.cpp Server.cpp User.cpp Irc.cpp channel.cpp
+SRC = main.cpp Server.cpp User.cpp Irc.cpp channel.cpp message.cpp
 
 OBJ_DIR = ./.obj/
 

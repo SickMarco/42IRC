@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 18:56:37 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:04:20 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ private:
 	void joinChannel(std::string channelName, User &client);
 	void leaveChannel(std::string channelName, User &client, std::string message);
 
+	void newClientHandler(struct pollfd* fds, int& numClients);
 	void newClientConnected(User& user);
 	void messageHandler(User& user);
 
@@ -76,7 +77,7 @@ public:
 	Server(const int& port, const std::string& password);
 	~Server();
 
-	void tester();
+	void run();
 	friend std::string trimMessage(const char* buffer, size_t startIndex);
 	friend void printStringNoP(const char* str, std::size_t length);
 };

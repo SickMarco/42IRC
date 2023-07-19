@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 14:21:39 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:17:38 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,12 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), se
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
 		throw std::runtime_error("Error: Wrong password!");
-	getMyIP();
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+        User cl;
+        cl.setSocket(-1);
+        clients.push_back(cl);
+    }
+    getMyIP();
 	socketInit();
 	binding();
 }
@@ -48,6 +53,7 @@ void Server::socketInit(){
     serverAddr.sin_addr.s_addr = inet_addr(IP);
 	std::cout << IP << std::endl;
 	std::cout << hostname << std::endl;
+    //controlla puliza serverAddr
 }
 
 void Server::binding(){
@@ -97,144 +103,59 @@ void Server::newClientConnected(User& user){
     send(user.getSocket(), RPL_WELCOME.c_str(), strlen(RPL_WELCOME.c_str()), 0);
 }
 
-void Server::messageHandler(User& user){
-		char buffer[1024];
-		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-		if (bytesRead < 0) {
-			perror("Receive error");
-			close(user.getSocket());
-			return ;
-		} else if (bytesRead == 0) {
-			close(user.getSocket());
-			user.setSocket(-1);
-			return ;
-		}
-		buffer[bytesRead] = '\0';
-		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
-		/* if(!strncmp(buffer, "NICK", 4))
-			user.changeNickname(buffer); */
-	 	if(!strncmp(buffer, "JOIN #", 6))
-			joinChannel(removeCRLF(&(buffer[6])), user);
-        else if (!strncmp(buffer, "PRIVMSG #", 9))
-            messageToChannel(user, removeCRLF(&(buffer[8])));
-        else if (!strncmp(buffer, "PRIVMSG ", 8))
-            messageToPrivate(user, removeCRLF(&(buffer[8])));
-        else if (!strncmp(buffer, "PART ", 5))
-        {
-            //std::cout << "BUFFER: " << buffer << std::endl;
-            std::string buf = removeCRLF(&(buffer[5]));
-            std::string token = std::strtok(&(buf[0]), " ");
-            leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
+void Server::newClientHandler(struct pollfd* fds, int& numClients) {
+    if (fds[0].revents & POLLIN) {
+        int clientSocket = accept(serverSocket, NULL, NULL);
+        if (clientSocket < 0) {
+            perror("Accept error");
+            return;
         }
-        else if (!strncmp(buffer, "PING", 4))
-        {
-            std::string PONG = "PONG " + std::string(std::strtok(&buffer[5], "\n")) + "\r\n";
-            send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
-        }
-        else if (!strncmp(buffer, "QUIT", 4))
-        {
-            close(user.getSocket());
-            user.setSocket(-1);
-            std::vector <std::string> ::iterator it = user.channelsJoined.begin();
-            std::vector <User> ccv;
-            for (; it != user.channelsJoined.end(); ++it)
-            {
-                ccv =  channels[*it].clients;
-                ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
+        // Aggiungi il nuovo client all'array
+        if (numClients < MAX_CLIENTS) {
+            int i;
+            for (i = 0; i < MAX_CLIENTS; ++i) {
+                if (clients[i].getSocket() == -1) {
+                    clients[i].setSocket(clientSocket);
+                    fds[i + 1].fd = clientSocket;
+                    fds[i + 1].events = POLLIN;
+                    break;
+                }
             }
-            clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
-        }
-		std::memset(buffer, 0, sizeof(buffer));
+            if (i != MAX_CLIENTS) {
+                numClients++;
+                newClientConnected(clients[i]);
+            }
+            else
+                close(clientSocket);
+        } 
+        else
+            close(clientSocket);
+    }
 }
 
-int Server::messageToPrivate(User& user, std::string buffer)
-{
-    std::string name = buffer.substr(0, buffer.find(' '));
-    std::string mex = buffer.substr(name.length() + 1, std::string::npos);
-
-    int clientSocket = -1;
-    std::vector<User> ::iterator it = clients.begin();
-    for (; it != clients.end(); it++)
-    {
-        if (it->getNick() == name)
-        {
-            clientSocket = it->getSocket();
-            break;
-        }
-    }
-    std::string PRIVMSG = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
-
-    bool sentToDest = false;
-    if (user.getNick() != name) {
-        send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
-        sentToDest = true;
-    }
-    if (!sentToDest)
-        send(user.getSocket(), PRIVMSG.c_str(), PRIVMSG.length(), 0);
-    return 0;
-}
-
-void Server::tester()
-{
-    for (int i = 0; i < MAX_CLIENTS; ++i)
-    {
-        User cl;
-        cl.setSocket(-1);
-        clients.push_back(cl);
-    }
+void Server::run() {
     // Aggiungi il socket del server all'array di pollfd
     struct pollfd fds[MAX_CLIENTS + 1];
     fds[0].fd = serverSocket;
     fds[0].events = POLLIN;
     int numClients = 0; // Numero attuale di client connessi
-    while (1) {
+
+    while (1) 
+    {
         int ret = poll(fds, numClients + 1, 1000);
         if (ret < 0) {
             if (errno == EINTR) {
                 perror("Poll error");
                 break;
             }
-        } else if (ret == 0) {
+        }
+        else if (ret == 0)
             continue;
-        }
-        // Controlla se ci sono nuove connessioni
-        if (fds[0].revents & POLLIN) {
-            int clientSocket = accept(serverSocket, NULL, NULL);
-            if (clientSocket < 0) {
-                perror("Accept error");
-                continue;
-            }
-            // Aggiungi il nuovo client all'array
-            if (numClients < MAX_CLIENTS) {
-                int i;
-                for (i = 0; i < MAX_CLIENTS; ++i) {
-                    if (clients[i].getSocket() == -1) {
-                        clients[i].setSocket(clientSocket);
-                        fds[i + 1].fd = clientSocket;
-                        fds[i + 1].events = POLLIN;
-                        break;
-                    }
-                }
-                if (i == MAX_CLIENTS) {
-                    close(clientSocket);
-                } else {
-                    // Incrementa il numero di client connessi
-                    numClients++;
-                    newClientConnected(clients[i]);
-                }
-            } else {
-                close(clientSocket);
-            }
-        }
-        // Controlla se ci sono dati in arrivo dai client esistenti
-        for (int i = 0; i < numClients; ++i) {
-            if (fds[i + 1].revents & POLLIN) {
+        newClientHandler(fds, numClients);
+        for (int i = 0; i < numClients; ++i)
+            if (fds[i + 1].revents & POLLIN)
                 messageHandler(clients[i]);
-            }
-        }
     }
-    // Chiudi tutte le connessioni client
-    for (int i = 0; i < numClients; ++i) {
+    for (int i = 0; i < numClients; ++i)         // Chiudi tutte le connessioni client
         close(clients[i].getSocket());
-    }
 }

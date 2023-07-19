@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:23:52 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/15 19:59:00 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/19 15:07:50 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int main(int ac, char **av)
 		const std::string pswd = av[2];
 		try {
 			Server server(port, pswd);
-			server.tester();
+			server.run();
 		}
 		catch(const std::exception& e) {
 			std::cerr << e.what() << '\n';
