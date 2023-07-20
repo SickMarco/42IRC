@@ -129,8 +129,12 @@ void Server::changeNick(std::string buffer, User &user)
     for (; it != clients.end(); it++)
     {
         if (buffer == it->getNick())
-            return ;//send Nickname already taken and than return 
-            //:oldnick!user@host NICK :newnick
+        {
+            //send Nickname already taken and than return 
+            std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
+            send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
+            return ;
+        }
     }
 
     std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";

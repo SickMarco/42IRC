@@ -86,7 +86,8 @@ void Server::newClientConnected(User& user)
 		if (!strncmp(buffer, "NICK", 4))
         {
             std::vector <User> ::iterator it = clients.begin();
-            for (; it != clients.end(); ++it) {   
+            for (; it != clients.end(); ++it)
+            {   
                 if (it->getNick() == trimMessage(buffer, 5)) {
                     std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
                     send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
@@ -94,7 +95,13 @@ void Server::newClientConnected(User& user)
                 }
             }
 			user.setNick(&((trimMessage(buffer, 5))[0]));
-			std::memset(buffer, 0, sizeof(buffer));
+            /* REPLACE WITH WELLCOME MESSAGE
+            std::string nickmsg = ":" + user.getNick() + " NICK " + &((trimMessage(buffer, 5))[0]) + "\r\n";
+            std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + &((trimMessage(buffer, 5))[0]) + "\r\n";
+			send(user.getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
+            send(user.getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);*/
+            
+            std::memset(buffer, 0, sizeof(buffer));
 		}
         else if (!strncmp(buffer, "USER", 4)) {
             user.setUser(std::strtok(&buffer[5], " "));
