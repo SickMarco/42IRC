@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 19:07:46 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/20 18:55:07 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void Server::socketInit(){
 	memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
-    serverAddr.sin_addr.s_addr = inet_addr(IP);
+    serverAddr.sin_addr.s_addr = inet_addr(IP.c_str());
 	std::cout << "SERVER IP: " << IP << std::endl;
     //controlla puliza serverAddr
 }
@@ -64,15 +64,17 @@ void Server::binding(){
 
 void Server::getMyIP(){
 	struct hostent *host_entry;
-	int	host;
+	char hostname[256];
 
-	host = gethostname(hostname, sizeof(hostname));
-	if (host < 0)
+	int	host = gethostname(hostname, sizeof(hostname)) == 0;
+    if (host < 0)
 		throw std::runtime_error("Hostname error");
-	host_entry = gethostbyname(hostname);
+    this->hostname = hostname;
+	host_entry = gethostbyname(&(hostname[0]));
 	if(!host_entry)
 		throw std::runtime_error("Host entry error");
     IP = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+	std::memset(hostname, 0, sizeof(hostname)); 
 }
 
 void Server::newClientConnected(User& user)
@@ -83,6 +85,7 @@ void Server::newClientConnected(User& user)
 		char buffer[1024];
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		buffer[bytesRead] = '\0';
+		printStringNoP(buffer, strlen(buffer));
 		if (!strncmp(buffer, "NICK", 4))
         {
             std::vector <User> ::iterator it = clients.begin();

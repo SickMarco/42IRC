@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 18:05:13 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/20 19:06:14 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ private:
 	std::string user;
 
 	std::string host;
-	char *ServerIP;
-	
+	std::string ServerIP;
+	std::vector <std::string> channelsJoined;
 
 public:
 	User();
@@ -50,19 +50,17 @@ public:
 
 	int getSocket() const;
 	void setSocket(const int& newSocket);
-	void setIP(char* IP);
+	void setIP(const std::string& IP);
 
 	std::string getUser() const;
 	std::string getNick() const;
+	std::vector<std::string>& getChannelsJoined();
 
-	void setNick(char* input);
-	void setUser(char* newUser);
+	void setNick(std::string input);
+	void setUser(std::string newUser);
 
 	friend std::string trimMessage(const char* buffer, size_t startIndex);
 	friend void printStringNoP(const char* str, std::size_t length);
-	
-	std::vector <std::string> channelsJoined;
-	//void changeNickname(std::string newNick);
 };
 
 #endif

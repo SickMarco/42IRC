@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 19:11:39 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/20 19:05:31 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 struct Channel {
 	std::string topic;
 	std::vector<User> clients;
+	std::vector<std::string> operators;
 };
 
 class Server
@@ -50,8 +51,8 @@ private:
 	const std::string serverPassword;
 	std::string userPassword;
 	const int port;
-	char hostname[256];
-	char *IP;
+	std::string hostname;
+	std::string IP;
 	bool isServerRunning;
 
 	std::vector<User> clients;

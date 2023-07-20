@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 17:43:55 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/20 19:06:33 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,36 @@
 
 void Server::joinChannel(std::string channelName, User &client)
 {
+    if (std::strchr(channelName.c_str(), ' '))
+        channelName = std::strtok(&channelName[0], " ");
+    //else if (std::strchr(channelName.c_str(), ',')) MULTICHANNEL
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
-	if (it != channels.end())
-        it->second.clients.push_back(client);                                           // Channel exists, add the client to the channel participants
+	if (it != channels.end())                                                           // Channel exists, add the client to the channel participants
+    {   
+        std::cout << "JOIN 1" << std::endl;
+        it->second.clients.push_back(client);
+        std::cout << "JOIN 1" << std::endl;
+        std::string userJoined = ":" + client.getNick() + " JOIN #" + channelName + "\r\n";
+    /*     std::vector<int>::iterator opIt = it->second.operators.begin();
+        for(; opIt != it->second.operators.end(); ++opIt)
+        {   
+            printStringNoP(userJoined.c_str(), userJoined.length());
+            send(*opIt, userJoined.c_str(), userJoined.length(), 0);
+        } */
+    }                                       
 	else {
+        std::cout << "JOIN 2" << std::endl;
         Channel newChannel;                                                             // Channel doesn't exist, create a new channel and add the client
         newChannel.clients.push_back(client);
+        //newChannel.operators.push_back();
         channels[channelName] = newChannel;
+        //std::string RPL_CHANNELMODEIS  = serverName + " 324 " + client.getNick() + " #" + channelName + " +o\r\n";
+        //printStringNoP(RPL_CHANNELMODEIS.c_str(), RPL_CHANNELMODEIS.length());
+        //send(client.getSocket(), RPL_CHANNELMODEIS.c_str(), RPL_CHANNELMODEIS.length(), 0);
     }
-    client.channelsJoined.push_back(channelName);
+    client.getChannelsJoined().push_back(channelName);
     // JOIN MESSAGE SEQUENCE
-    std::string join = ":" + client.getNick() + "!" + client.getNick() + "@" +  std::string(IP) + " JOIN #" + channelName + "\r\n";
+    std::string join = ":" + client.getNick() + "!" + client.getUser() + "@" + hostname + " JOIN #" + channelName + "\r\n";
     std::string RPL_TOPIC = serverName + " 332 " + client.getNick() + " #" + channelName + " :" + "\r\n";
     std::string RPL_NAMREPLY = serverName + " 353 " + client.getNick() + " = #" +channelName + " :";
     std::string RPL_ENDOFNAMES = serverName + " 366 " + client.getNick() + " #" + channelName + " :End of NAMES list\r\n";
@@ -62,6 +81,6 @@ void Server::leaveChannel(std::string channelName, User& client, std::string mes
         std::vector<User> & channelClients = it->second.clients;
         channelClients.erase(std::remove(channelClients.begin(), channelClients.end(), client), channelClients.end());
         // Update client channel list
-        client.channelsJoined.erase(std::remove(client.channelsJoined.begin(), client.channelsJoined.end(), channelName), client.channelsJoined.end());
+        client.getChannelsJoined().erase(std::remove(client.getChannelsJoined().begin(), client.getChannelsJoined().end(), channelName), client.getChannelsJoined().end());
     }
 }

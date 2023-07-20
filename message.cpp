@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/19 15:35:44 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/20 19:08:17 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void Server::quit(char * buffer, User &user)
 {
     std::string buf = buffer;
     std::vector <User> ::iterator it2 = clients.begin();
-    std::string quitmsg = ":" + user.getNick() + "!"+ user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
+    std::string quitmsg = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
     for (; it2 != clients.end(); ++it2)
         send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
 
@@ -112,14 +112,9 @@ void Server::quit(char * buffer, User &user)
     user.setSocket(-1);
 	if (!strncmp(&buffer[6], "ragequit", 8))
 		isServerRunning = false;
-    std::vector <std::string> ::iterator it = user.channelsJoined.begin();
-    std::vector <User> ccv;
-    for (; it != user.channelsJoined.end(); ++it)
-    {
-        ccv =  channels[*it].clients;
-        ccv.erase(std::remove(ccv.begin(), ccv.end(), user), ccv.end());
-    }
-    clients.erase(std::remove(clients.begin(), clients.end(), user), clients.end());
+    user.setNick("");
+    user.setUser("");
+    user.setIP("");
 }
 
 void Server::changeNick(std::string buffer, User &user)
@@ -141,8 +136,8 @@ void Server::changeNick(std::string buffer, User &user)
     std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + buffer + "\r\n";
     std::cout << nickmsg;
     //search in channels and change nick
-    std::vector <std::string> ::iterator it2 = user.channelsJoined.begin();
-    for (; it2 != user.channelsJoined.end(); it2++)
+    std::vector<std::string>::iterator it2 = user.getChannelsJoined().begin();
+    for (; it2 != user.getChannelsJoined().end(); it2++)
     {
         std::vector <User> ::iterator it3;
         it3 = std::find(channels[*it2].clients.begin(), channels[*it2].clients.end(), user);
