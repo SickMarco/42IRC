@@ -72,15 +72,10 @@ int Server::messageToPrivate(User& user, std::string buffer)
             break;
         }
     }
-    std::string PRIVMSG = ":" + user.getNick() + " PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
+    std::string PRIVMSG = ":" + user.getNick() + "! PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
 
-    bool sentToDest = false;
-    if (user.getNick() != name) {
+    if (user.getNick() != name)
         send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
-        sentToDest = true;
-    }
-    if (!sentToDest)
-        send(user.getSocket(), PRIVMSG.c_str(), PRIVMSG.length(), 0);
     return 0;
 }
 
