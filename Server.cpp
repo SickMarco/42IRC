@@ -73,7 +73,7 @@ void Server::getMyIP(){
 	std::memset(hostname, 0, sizeof(hostname)); 
 }
 
-void Server::newClientConnected(User& user)
+int Server::newClientConnected(User& user)
 {
 	user.setIP(IP);
     char buffer[1024];
@@ -85,14 +85,25 @@ void Server::newClientConnected(User& user)
 		printStringNoP(buffer, strlen(buffer));
         if  (!strncmp(buffer, "PASS", 4))
         {
-            std::string psw = std::string(&(buffer[5]));
+            std::string psw = std::string(&(buffer[6]));
             psw = psw.substr(0, psw.length() - 1);
             if (psw == serverPassword || serverPassword.empty())
                 break;
             else
             {
-                std::string ERR_PASSWDMISMATCH = ":" + serverName + " 464 " + " :Password incorrect.\r\n";
+                std::string ERR_PASSWDMISMATCH = serverName + " PASSW_ERR :Password incorrect.\r\n";
                 send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
+                
+                std::string quitmsg = "ERROR :Closing Link: " + hostname + "\r\n";
+                send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+                
+                close(user.getSocket());
+                user.setSocket(-1);
+                user.setNick("");
+                user.setUser("");
+                user.setIP("");
+
+                return 1;
             }
         }
     }
@@ -113,16 +124,6 @@ void Server::newClientConnected(User& user)
         }
     }
 
-
-	for (int i = 0; i < 5; ++i)
-    {
-		
-		
-		
-        if (!user.getNick().empty() && !user.getUser().empty())
-            break;
-	}
-
     std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "\r\n";
     std::string RPL_YOURHOST = serverName + " 002 " + user.getNick() + " :Hosted by Frat Carnal, running version 0.42\r\n";
     std::string RPL_CREATED = serverName + " 003 " + user.getNick() + " :This server was created on 2023/07/19\r\n";
@@ -133,6 +134,8 @@ void Server::newClientConnected(User& user)
     send(user.getSocket(), RPL_CREATED.c_str(), RPL_CREATED.length(), 0);
     send(user.getSocket(), RPL_MOTD.c_str(), RPL_MOTD.length(), 0);
     send(user.getSocket(), RPL_ENDOFMOTD.c_str(), RPL_ENDOFMOTD.length(), 0);
+
+    return 0;
 }
 
 void Server::newClientHandler(struct pollfd* fds, int& numClients) {
@@ -154,9 +157,10 @@ void Server::newClientHandler(struct pollfd* fds, int& numClients) {
                     break;
                 }
             }
-            if (i != MAX_CLIENTS) {
-                numClients++;
-                newClientConnected(clients[i]);
+            if (i != MAX_CLIENTS)
+            {
+                if (newClientConnected(clients[i]) != 1)
+                    numClients++;
             }
             else
                 close(clientSocket);
