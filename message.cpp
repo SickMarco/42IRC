@@ -58,6 +58,18 @@ void Server::commandHandler(User &user)
         quit(&(msgBuffer[0]), user);
     else if (!strncmp(msgBuffer.c_str(), "NICK ", 5))
         changeNick(&(msgBuffer[5]), user, 0);
+    else if (!strncmp(msgBuffer.c_str(), "INVITE ", 7))
+    {//INVITE mbozzi #hh\xa
+    }
+    else if (!strncmp(msgBuffer.c_str(), "KICK ", 5))
+    {//KICK #hh mbozzi :perchessi\xa
+    }
+    else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
+    {//TOPIC #hh\xa
+    }
+    else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
+    {//MODE #hh +o mabaffo\xa
+    }
 }
 
 int Server::messageToPrivate(User& user, std::string buffer)
