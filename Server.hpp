@@ -58,6 +58,8 @@ private:
 	std::vector<User> clients;
 	std::map<std::string, Channel > channels;	//mappa il nome del canale ad un vettore di clients che ne fanno parte
 
+	std::string msgBuffer;
+
 	//SOCKET
 	int serverSocket;
 	struct sockaddr_in serverAddr;

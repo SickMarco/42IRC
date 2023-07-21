@@ -89,7 +89,8 @@ void Server::newClientConnected(User& user)
             std::memset(buffer, 0, sizeof(buffer));
 		}
         else if (!strncmp(buffer, "USER", 4)) {
-            user.setUser(std::strtok(&buffer[5], " "));
+            std::string s  = std::strtok(&buffer[5], " ");
+            user.setUser(s.substr(0, s.length() - 1));
         }
         if (!user.getNick().empty() && !user.getUser().empty())
             break;
