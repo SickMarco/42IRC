@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 19:06:14 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 11:55:23 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,8 @@ private:
 public:
 	User();
 	~User();
-	bool operator==(const User& other) const {return (clientSocket == other.clientSocket);}
+	bool operator==(const User& other) const;
+	User& operator=(const User& src);
 
 	int getSocket() const;
 	void setSocket(const int& newSocket);

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 18:55:07 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 12:03:12 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,7 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), se
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
 		throw std::runtime_error("Error: Wrong password!");
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        User cl;
-        cl.setSocket(-1);
-        clients.push_back(cl);
-    }
+    clients.resize(MAX_CLIENTS);
     getMyIP();
 	socketInit();
 	binding();
