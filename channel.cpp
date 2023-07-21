@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 19:06:33 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 12:02:04 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,21 +18,25 @@ void Server::joinChannel(std::string channelName, User &client)
         channelName = std::strtok(&channelName[0], " ");
     //else if (std::strchr(channelName.c_str(), ',')) MULTICHANNEL
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
-	if (it != channels.end())                                                           // Channel exists, add the client to the channel participants
-    {   
-        std::cout << "JOIN 1" << std::endl;
-        it->second.clients.push_back(client);
-        std::cout << "JOIN 1" << std::endl;
-        std::string userJoined = ":" + client.getNick() + " JOIN #" + channelName + "\r\n";
-    /*     std::vector<int>::iterator opIt = it->second.operators.begin();
+	if (it != channels.end()) {                                                         // Channel exists, add the client to the channel participants 
+        std::vector<User>::iterator userIt = it->second.clients.begin();
+        for (; userIt != it->second.clients.end(); ++userIt) {
+            if (userIt->getNick() == client.getNick()) {
+                *userIt = client;
+                break;
+            }
+    	}
+        if (userIt == it->second.clients.end())
+            it->second.clients.push_back(client);
+        /*std::string userJoined = ":" + client.getNick() + " JOIN #" + channelName + "\r\n";
+        std::vector<int>::iterator opIt = it->second.operators.begin();
         for(; opIt != it->second.operators.end(); ++opIt)
         {   
             printStringNoP(userJoined.c_str(), userJoined.length());
             send(*opIt, userJoined.c_str(), userJoined.length(), 0);
         } */
-    }                                       
+    }                                     
 	else {
-        std::cout << "JOIN 2" << std::endl;
         Channel newChannel;                                                             // Channel doesn't exist, create a new channel and add the client
         newChannel.clients.push_back(client);
         //newChannel.operators.push_back();

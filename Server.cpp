@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 18:55:07 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 12:03:12 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,7 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), se
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
 		throw std::runtime_error("Error: Wrong password!");
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        User cl;
-        cl.setSocket(-1);
-        clients.push_back(cl);
-    }
+    clients.resize(MAX_CLIENTS);
     getMyIP();
 	socketInit();
 	binding();
@@ -86,11 +82,9 @@ void Server::newClientConnected(User& user)
 		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
 		buffer[bytesRead] = '\0';
 		printStringNoP(buffer, strlen(buffer));
-		if (!strncmp(buffer, "NICK", 4))
-        {
+		if (!strncmp(buffer, "NICK", 4)) {
             std::vector <User> ::iterator it = clients.begin();
-            for (; it != clients.end(); ++it)
-            {   
+            for (; it != clients.end(); ++it) {   
                 if (it->getNick() == trimMessage(buffer, 5)) {
                     std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
                     send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
@@ -103,7 +97,6 @@ void Server::newClientConnected(User& user)
             std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + &((trimMessage(buffer, 5))[0]) + "\r\n";
 			send(user.getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
             send(user.getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);*/
-            
             std::memset(buffer, 0, sizeof(buffer));
 		}
         else if (!strncmp(buffer, "USER", 4)) {

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 19:05:57 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 12:04:29 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,3 +31,18 @@ std::string User::getNick() const { return nick; }
 std::string User::getUser() const { return user; }
 
 std::vector<std::string>& User::getChannelsJoined() { return this->channelsJoined; }
+
+bool User::operator==(const User& other) const {return (clientSocket == other.clientSocket);}
+
+User&  User::operator=(const User& src){
+	if (this != &src){
+		this->clientAddr = src.clientAddr;
+		this->clientAddrLen = src.clientAddrLen;
+		this->clientSocket = src.clientSocket;
+		this->host = src.host;
+		this->nick = src.nick;
+		this->user = src.user;
+		this->ServerIP = src.ServerIP;
+	}
+	return *this;
+}
