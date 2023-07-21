@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 19:08:17 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 18:31:57 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,8 +142,8 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     {
         std::cout << nickmsg;
         //search in channels and change nick
-        std::vector<std::string>::iterator it2 = user.getChannelsJoined().begin();
-        for (; it2 != user.getChannelsJoined().end(); it2++)
+        std::vector<std::string>::iterator it2 = user.getChannels().begin();
+        for (; it2 != user.getChannels().end(); it2++)
         {
             std::vector <User> ::iterator it3;
             it3 = std::find(channels[*it2].clients.begin(), channels[*it2].clients.end(), user);

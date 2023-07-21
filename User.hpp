@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 11:55:23 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 18:26:14 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ public:
 
 	std::string getUser() const;
 	std::string getNick() const;
-	std::vector<std::string>& getChannelsJoined();
+	std::vector<std::string>& getChannels();
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);

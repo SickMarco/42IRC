@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/20 19:05:31 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 18:34:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,15 @@ private:
 	void socketInit();
 	void binding();
 	int messageToPrivate(User& user, std::string buffer);
-	int messageToChannel(User& user, std::string buffer);
 
+	//CHANNELS
 	void joinChannel(std::string channelName, User &client);
+	void createNewChannel(const User& user, const std::string& channelName, bool& setOp);
+	bool channelExist(User& user, const std::string& channelName);
+	void joinMessageSequence(const User& user, const std::string& channelName);
+	void channelOperators(const User& user, const std::string& channelName, bool& setOp);
 	void leaveChannel(std::string channelName, User &client, std::string message);
+	int messageToChannel(User& user, std::string buffer);
 
 	void newClientHandler(struct pollfd* fds, int& numClients);
 	void newClientConnected(User& user);
