@@ -76,22 +76,49 @@ void Server::getMyIP(){
 void Server::newClientConnected(User& user)
 {
 	user.setIP(IP);
-	for (int i = 0; i < 5; ++i)
+    char buffer[1024];
+    ssize_t bytesRead;
+    while (1)
     {
-		char buffer[1024];
-		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-		buffer[bytesRead] = '\0';
+        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
+        buffer[bytesRead] = '\0';
 		printStringNoP(buffer, strlen(buffer));
-		if (!strncmp(buffer, "NICK", 4))
+        if  (!strncmp(buffer, "PASS", 4))
         {
-            if (changeNick(&(buffer[5]), user, 1) == 1)
-                i--;
+            std::string psw = std::string(&(buffer[5]));
+            psw = psw.substr(0, psw.length() - 1);
+            if (psw == serverPassword || serverPassword.empty())
+                break;
+            else
+            {
+                std::string ERR_PASSWDMISMATCH = ":" + serverName + " 464 " + " :Password incorrect.\r\n";
+                send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
+            }
+        }
+    }
+    while (user.getNick().empty())
+    {   
+        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
+        buffer[bytesRead] = '\0';
+		printStringNoP(buffer, strlen(buffer));
+        if (!strncmp(buffer, "NICK ", 5))
+        {
+            changeNick(&(buffer[5]), user, 1);
             std::memset(buffer, 0, sizeof(buffer));
 		}
-        else if (!strncmp(buffer, "USER", 4)) {
+        else if (!strncmp(buffer, "USER ", 5))
+        {
             std::string s  = std::strtok(&buffer[5], " ");
             user.setUser(s.substr(0, s.length() - 1));
         }
+    }
+
+
+	for (int i = 0; i < 5; ++i)
+    {
+		
+		
+		
         if (!user.getNick().empty() && !user.getUser().empty())
             break;
 	}
