@@ -78,6 +78,7 @@ private:
 	void messageHandler(User& user);
 	void quit(char * buffer, User &user);
 	int changeNick(std::string buffer, User &user, int flag);
+	void commandHandler(User &user);
 
 public:
 	Server(const int& port, const std::string& password);

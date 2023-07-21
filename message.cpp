@@ -26,35 +26,38 @@ void Server::messageHandler(User& user)
 			user.setSocket(-1);
 			return ;
 		}
-		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));
-        
+		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));        
         msgBuffer += std::string(buffer);
         if (!std::strchr(buffer, '\n'))
             return ;
-
-	 	if(!strncmp(msgBuffer.c_str(), "JOIN #", 6))
-			joinChannel(removeCRLF(&(msgBuffer[6])), user);
-        else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
-            messageToChannel(user, removeCRLF(&(msgBuffer[8])));
-        else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))
-            messageToPrivate(user, removeCRLF(&(msgBuffer[8])));
-        else if (!strncmp(msgBuffer.c_str(), "PART ", 5))
-        {
-            std::string buf = removeCRLF(&(msgBuffer[5]));
-            std::string token = std::strtok(&(buf[0]), " ");
-            leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
-        }
-        else if (!strncmp(msgBuffer.c_str(), "PING", 4))
-        {
-            std::string PONG = "PONG " + std::string(std::strtok(&msgBuffer[5], "\n")) + "\r\n";
-            send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
-        }
-        else if (!strncmp(msgBuffer.c_str(), "QUIT ", 5))
-            quit(&(msgBuffer[0]), user);
-        else if (!strncmp(msgBuffer.c_str(), "NICK ", 5))
-            changeNick(&(msgBuffer[5]), user, 0);
+        commandHandler(user);
         msgBuffer.clear();
 		std::memset(buffer, 0, sizeof(buffer));
+}
+
+void Server::commandHandler(User &user)
+{
+    if(!strncmp(msgBuffer.c_str(), "JOIN #", 6))
+			joinChannel(removeCRLF(&(msgBuffer[6])), user);
+    else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
+        messageToChannel(user, removeCRLF(&(msgBuffer[8])));
+    else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))
+        messageToPrivate(user, removeCRLF(&(msgBuffer[8])));
+    else if (!strncmp(msgBuffer.c_str(), "PART ", 5))
+    {
+        std::string buf = removeCRLF(&(msgBuffer[5]));
+        std::string token = std::strtok(&(buf[0]), " ");
+        leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
+    }
+    else if (!strncmp(msgBuffer.c_str(), "PING", 4))
+    {
+        std::string PONG = "PONG " + std::string(std::strtok(&msgBuffer[5], "\n")) + "\r\n";
+        send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
+    }
+    else if (!strncmp(msgBuffer.c_str(), "QUIT ", 5))
+        quit(&(msgBuffer[0]), user);
+    else if (!strncmp(msgBuffer.c_str(), "NICK ", 5))
+        changeNick(&(msgBuffer[5]), user, 0);
 }
 
 int Server::messageToPrivate(User& user, std::string buffer)
