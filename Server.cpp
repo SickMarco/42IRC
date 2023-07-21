@@ -88,29 +88,17 @@ void Server::newClientConnected(User& user)
 		printStringNoP(buffer, strlen(buffer));
 		if (!strncmp(buffer, "NICK", 4))
         {
-            std::vector <User> ::iterator it = clients.begin();
-            for (; it != clients.end(); ++it)
-            {   
-                if (it->getNick() == trimMessage(buffer, 5)) {
-                    std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
-                    send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
-                    return ;
-                }
-            }
-			user.setNick(&((trimMessage(buffer, 5))[0]));
-            /* REPLACE WITH WELLCOME MESSAGE
-            std::string nickmsg = ":" + user.getNick() + " NICK " + &((trimMessage(buffer, 5))[0]) + "\r\n";
-            std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + &((trimMessage(buffer, 5))[0]) + "\r\n";
-			send(user.getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
-            send(user.getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);*/
-            
+            if (changeNick(&(buffer[5]), user, 1) == 1)
+                i--;
             std::memset(buffer, 0, sizeof(buffer));
 		}
         else if (!strncmp(buffer, "USER", 4)) {
             user.setUser(std::strtok(&buffer[5], " "));
-            break;
         }
+        if (!user.getNick().empty() && !user.getUser().empty())
+            break;
 	}
+
     std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "\r\n";
     std::string RPL_YOURHOST = serverName + " 002 " + user.getNick() + " :Hosted by Frat Carnal, running version 0.42\r\n";
     std::string RPL_CREATED = serverName + " 003 " + user.getNick() + " :This server was created on 2023/07/19\r\n";
