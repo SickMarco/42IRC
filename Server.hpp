@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 18:34:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 19:31:42 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ private:
 	bool channelExist(User& user, const std::string& channelName);
 	void joinMessageSequence(const User& user, const std::string& channelName);
 	void channelOperators(const User& user, const std::string& channelName, bool& setOp);
+	void multiChannelJoin(User& user, std::string channelName);
 	void leaveChannel(std::string channelName, User &client, std::string message);
 	int messageToChannel(User& user, std::string buffer);
 

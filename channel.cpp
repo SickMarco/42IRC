@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 18:39:11 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/21 19:31:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,18 @@
 
 void Server::joinChannel(std::string channelName, User& user) {
     bool setOp = false;
-    if (std::strchr(channelName.c_str(), ' '))
-        channelName = std::strtok(&channelName[0], " ");
-    //else if (std::strchr(channelName.c_str(), ',')) MULTICHANNEL
-    if (!channelExist(user, channelName))
-        createNewChannel(user, channelName, setOp);
-    user.getChannels().push_back(channelName);
-    joinMessageSequence(user, channelName);
-    channelOperators(user, channelName, setOp);
+    if (std::strchr(channelName.c_str(), ','))
+        multiChannelJoin(user, std::strtok(&channelName[0], " "));
+    else
+    {
+        if (std::strchr(channelName.c_str(), ' '))
+            channelName = std::strtok(&channelName[0], " ");
+        if (!channelExist(user, channelName))
+            createNewChannel(user, channelName, setOp);
+        user.getChannels().push_back(channelName);
+        joinMessageSequence(user, channelName);
+        channelOperators(user, channelName, setOp);
+    }
 }
 
 bool Server::channelExist(User& user, const std::string& channelName){
@@ -43,7 +47,8 @@ bool Server::channelExist(User& user, const std::string& channelName){
 }
 
 void Server::createNewChannel(const User& user, const std::string& channelName, bool& setOp){
-    Channel newChannel;                             // Channel doesn't exist, create a new channel and add the user
+    // Channel doesn't exist, create a new channel and add the user
+    Channel newChannel;                             
     newChannel.clients.push_back(user);
     newChannel.operators.push_back(user.getNick());
     channels[channelName] = newChannel;
@@ -90,6 +95,23 @@ void Server::channelOperators(const User& user, const std::string& channelName, 
             send(user.getSocket(), sendOperator.c_str(), sendOperator.length(), 0);
         }
     }
+}
+
+ void Server::multiChannelJoin(User& user, std::string channelName){
+    std::vector<std::string> splitChannel;
+    size_t pos = 0;
+    size_t next;
+    while ((next = channelName.find(',', pos)) != std::string::npos) {
+        std::string channel = channelName.substr(pos, next - pos);
+        channel.erase(std::remove(channel.begin(), channel.end(), '#'), channel.end());
+        splitChannel.push_back(channel);
+        pos = next + 1;
+    }
+    std::string lastChannel = channelName.substr(pos);
+    lastChannel.erase(std::remove(lastChannel.begin(), lastChannel.end(), '#'), lastChannel.end());
+    splitChannel.push_back(lastChannel);
+    for (std::vector<std::string>::iterator it = splitChannel.begin(); it != splitChannel.end(); ++it)
+        joinChannel(*it, user);
 }
 
 void Server::leaveChannel(std::string channelName, User& user, std::string message)
