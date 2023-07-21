@@ -79,7 +79,7 @@ private:
 	int messageToChannel(User& user, std::string buffer);
 
 	void newClientHandler(struct pollfd* fds, int& numClients);
-	void newClientConnected(User& user);
+	int newClientConnected(User& user);
 	void messageHandler(User& user);
 	void quit(char * buffer, User &user);
 	int changeNick(std::string buffer, User &user, int flag);
