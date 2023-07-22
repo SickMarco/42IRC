@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Irc.cpp                                            :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 18:44:53 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 12:10:56 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Irc.hpp"
+#include "Server.hpp"
+#include "User.hpp"
 
 std::string trimMessage(const char* buffer, size_t startIndex){
 	std::string input = buffer;

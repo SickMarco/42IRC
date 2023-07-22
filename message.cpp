@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 18:31:57 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 11:32:02 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,16 +38,16 @@ void Server::messageHandler(User& user)
 void Server::commandHandler(User &user)
 {
     if(!strncmp(msgBuffer.c_str(), "JOIN #", 6))
-			joinChannel(removeCRLF(&(msgBuffer[6])), user);
+			channels.joinChannel(removeCRLF(&(msgBuffer[6])), user);
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
-        messageToChannel(user, removeCRLF(&(msgBuffer[8])));
+        channels.messageToChannel(user, removeCRLF(&(msgBuffer[8])));
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))
         messageToPrivate(user, removeCRLF(&(msgBuffer[8])));
     else if (!strncmp(msgBuffer.c_str(), "PART ", 5))
     {
         std::string buf = removeCRLF(&(msgBuffer[5]));
         std::string token = std::strtok(&(buf[0]), " ");
-        leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
+        channels.leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
     }
     else if (!strncmp(msgBuffer.c_str(), "PING", 4))
     {
@@ -94,27 +94,6 @@ int Server::messageToPrivate(User& user, std::string buffer)
     return 0;
 }
 
-int Server::messageToChannel(User& user, std::string buffer)
-{
-    std::string channelName = buffer.substr(1, buffer.find(' '));
-    channelName = channelName.substr(0, channelName.length() - 1);
-    std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
-
-    // Find the channel
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    if (it != channels.end()) {
-        std::vector<User> channelClients = it->second.clients;
-        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex.substr(0, mex.length()) + "\r\n";
-
-        for (size_t i = 0; i < channelClients.size(); ++i) {
-            if (channelClients[i].getSocket() != -1 && channelClients[i].getSocket() != user.getSocket())
-                send(channelClients[i].getSocket(), privmsg.c_str(), privmsg.length(), 0);
-        }
-        return 1;
-    }
-    return 0;
-}
-
 void Server::quit(char * buffer, User &user)
 {
     std::string buf = buffer;
@@ -158,8 +137,8 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         for (; it2 != user.getChannels().end(); it2++)
         {
             std::vector <User> ::iterator it3;
-            it3 = std::find(channels[*it2].clients.begin(), channels[*it2].clients.end(), user);
-            if (it3 != channels[*it2].clients.end())
+            it3 = std::find(channels.getChannels()[*it2].clients.begin(), channels.getChannels()[*it2].clients.end(), user);
+            if (it3 != channels.getChannels()[*it2].clients.end())
                 it3->setNick(&(buffer[0]));
         }
     }

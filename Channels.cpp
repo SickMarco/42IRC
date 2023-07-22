@@ -1,18 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   channel.cpp                                        :+:      :+:    :+:   */
+/*   Channels.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/18 17:31:02 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 19:31:54 by mbozzi           ###   ########.fr       */
+/*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
+/*   Updated: 2023/07/22 11:39:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "Channels.hpp"
 
-void Server::joinChannel(std::string channelName, User& user) {
+Channels::Channels(){}
+
+Channels::~Channels(){}
+
+Channels::Channels(const std::string& serverName, const std::string& hostname) : serverName(serverName), hostname(hostname) {}
+
+std::map<std::string, Channel >& Channels::getChannels() { return this->channels; }
+
+int Channels::messageToChannel(User& user, std::string buffer)
+{
+    std::string channelName = buffer.substr(1, buffer.find(' '));
+    channelName = channelName.substr(0, channelName.length() - 1);
+    std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
+
+    // Find the channel
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    if (it != channels.end()) {
+        std::vector<User> channelClients = it->second.clients;
+        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex.substr(0, mex.length()) + "\r\n";
+
+        for (size_t i = 0; i < channelClients.size(); ++i) {
+            if (channelClients[i].getSocket() != -1 && channelClients[i].getSocket() != user.getSocket())
+                send(channelClients[i].getSocket(), privmsg.c_str(), privmsg.length(), 0);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void Channels::joinChannel(std::string channelName, User& user) {
     bool setOp = false;
     if (std::strchr(channelName.c_str(), ','))
         multiChannelJoin(user, std::strtok(&channelName[0], " "));
@@ -28,8 +57,8 @@ void Server::joinChannel(std::string channelName, User& user) {
     }
 }
 
-bool Server::channelExist(User& user, const std::string& channelName){
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+bool Channels::channelExist(User& user, const std::string& channelName){
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
     if (it != channels.end()) {
         // Channel exists, add the user to the channel participants
         std::vector<User>::iterator userIt = it->second.clients.begin();
@@ -46,22 +75,22 @@ bool Server::channelExist(User& user, const std::string& channelName){
     return false;
 }
 
-void Server::createNewChannel(const User& user, const std::string& channelName, bool& setOp){
+void Channels::createNewChannel(const User& user, const std::string& channelName, bool& setOp){
     // Channel doesn't exist, create a new channel and add the user
-    Channel newChannel;                             
+    Channel newChannel;                           
     newChannel.clients.push_back(user);
     newChannel.operators.push_back(user.getNick());
     channels[channelName] = newChannel;
     setOp = true;
 }
 
-void Server::joinMessageSequence(const User& user, const std::string& channelName) {
+void Channels::joinMessageSequence(const User& user, const std::string& channelName) {
     std::string join = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " JOIN #" + channelName + "\r\n";
     std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + "\r\n";
     std::string RPL_NAMREPLY = serverName + " 353 " + user.getNick() + " = #" + channelName + " :";
     std::string RPL_ENDOFNAMES = serverName + " 366 " + user.getNick() + " #" + channelName + " :End of NAMES list\r\n";
     // Send JOIN message to all users in the channel
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
     for (size_t i = 0; i < it->second.clients.size(); ++i) {
         if (it->second.clients[i].getSocket() != -1) {
             send(it->second.clients[i].getSocket(), join.c_str(), join.length(), 0);
@@ -80,7 +109,7 @@ void Server::joinMessageSequence(const User& user, const std::string& channelNam
     send(user.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
 }
 
-void Server::channelOperators(const User& user, const std::string& channelName, bool& setOp){
+void Channels::channelOperators(const User& user, const std::string& channelName, bool& setOp){
     if (setOp == true) {
         //Set first user as operator
         std::string setOperator = serverName + " MODE #" + channelName + " +o " + user.getNick() + "\r\n";
@@ -88,7 +117,7 @@ void Server::channelOperators(const User& user, const std::string& channelName, 
     }
     else {
         //Notify all user of channels operators
-        std::map<std::string, Channel>::iterator it = channels.find(channelName);
+        std::map<std::string, Channel >::iterator it = channels.find(channelName);
         std::vector<std::string>::iterator opIt = it->second.operators.begin();
         for (; opIt != it->second.operators.end(); ++opIt) {
             std::string sendOperator = serverName + " MODE #" + channelName + " +o " + *opIt + "\r\n";
@@ -97,7 +126,7 @@ void Server::channelOperators(const User& user, const std::string& channelName, 
     }
 }
 
- void Server::multiChannelJoin(User& user, std::string channelName){
+ void Channels::multiChannelJoin(User& user, std::string channelName){
     std::vector<std::string> splitChannel;
     size_t pos = 0;
     size_t next;
@@ -114,10 +143,10 @@ void Server::channelOperators(const User& user, const std::string& channelName, 
         joinChannel(*it, user);
 }
 
-void Server::leaveChannel(std::string channelName, User& user, std::string message)
+void Channels::leaveChannel(std::string channelName, User& user, std::string message)
 {
     // Check if the channel exists
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
     (void )message;
     if (it != channels.end())
     {

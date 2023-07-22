@@ -1,23 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Irc.hpp                                            :+:      :+:    :+:   */
+/*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/12 13:52:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/18 18:45:01 by mbozzi           ###   ########.fr       */
+/*   Created: 2023/07/22 11:44:39 by mbozzi            #+#    #+#             */
+/*   Updated: 2023/07/22 11:57:01 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IRC_HPP
-#define IRC_HPP
+#ifndef SOCKET_HPP
+#define SOCKET_HPP
 
 #include <iostream>
-#include <cstdlib>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <cstring>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <netdb.h>
 
-std::string trimMessage(const char* buffer, size_t startIndex);
-std::string removeCRLF(const char* buffer);
-void 		printStringNoP(const char* str, std::size_t length);
+
+#define SERVER_PORT 6667
+
+class Socket
+{
+private:
+	int serverSocket;
+	struct sockaddr_in serverAddr;
+	
+public:
+	Socket();
+	~Socket();
+
+	void getMyIP(std::string& hostnm, std::string& IP);
+	void socketInit(std::string IP);
+	void binding();
+
+	int getSocket() const;
+};
+
+
+
 
 #endif

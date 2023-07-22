@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 18:26:14 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 12:10:22 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,6 @@
 #include <algorithm>
 #include <map>
 #include <vector>
-
-#include "Irc.hpp"
 
 class User
 {
@@ -59,9 +57,10 @@ public:
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);
-
-	friend std::string trimMessage(const char* buffer, size_t startIndex);
-	friend void printStringNoP(const char* str, std::size_t length);
 };
+
+std::string trimMessage(const char* buffer, size_t startIndex);
+std::string removeCRLF(const char* buffer);
+void 		printStringNoP(const char* str, std::size_t length);
 
 #endif
