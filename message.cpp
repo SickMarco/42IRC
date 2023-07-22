@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 11:32:02 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 16:07:49 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void Server::messageHandler(User& user)
 void Server::commandHandler(User &user)
 {
     if(!strncmp(msgBuffer.c_str(), "JOIN #", 6))
-			channels.joinChannel(removeCRLF(&(msgBuffer[6])), user);
+			channels.joinChannel(user, removeCRLF(&(msgBuffer[6])));
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
         channels.messageToChannel(user, removeCRLF(&(msgBuffer[8])));
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))
@@ -47,7 +47,7 @@ void Server::commandHandler(User &user)
     {
         std::string buf = removeCRLF(&(msgBuffer[5]));
         std::string token = std::strtok(&(buf[0]), " ");
-        channels.leaveChannel(&(token[1]), user, buf.substr(buf.find(':')));
+        channels.leaveChannel(user, &(token[1]), buf.substr(buf.find(':')));
     }
     else if (!strncmp(msgBuffer.c_str(), "PING", 4))
     {
@@ -65,8 +65,7 @@ void Server::commandHandler(User &user)
     {//KICK #hh mbozzi :perchessi\xa
     }
     else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
-    {//TOPIC #hh\xa
-    }
+        channels.topic(user, removeCRLF(&msgBuffer[0]));
     else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
     {//MODE #hh +o mabaffo\xa
     }

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 12:25:38 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 16:13:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int Server::newClientConnected(User& user)
             }
         }
     }
-    while (user.getNick().empty())
+    while (user.getUser().empty())
     {   
         bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
         buffer[bytesRead] = '\0';
@@ -73,10 +73,11 @@ int Server::newClientConnected(User& user)
             changeNick(&(buffer[5]), user, 1);
             std::memset(buffer, 0, sizeof(buffer));
 		}
-        else if (!strncmp(buffer, "USER ", 5))
+        else if (!strncmp(buffer, "USER", 4))
         {
-            std::string s  = std::strtok(&buffer[5], " ");
-            user.setUser(s.substr(0, s.length() - 1));
+            std::string s = std::strtok(&buffer[5], " ");
+            user.setUser(s.substr(0, s.length()));
+            std::cout << "USER: " << user.getUser() << std::endl;
         }
     }
 
