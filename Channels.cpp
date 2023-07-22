@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 11:39:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/22 12:30:31 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,14 @@ Channels::Channels(){}
 
 Channels::~Channels(){}
 
-Channels::Channels(const std::string& serverName, const std::string& hostname) : serverName(serverName), hostname(hostname) {}
+void Channels::init(const std::string& serverName, const std::string& hostname) {
+    this->serverName = serverName;
+    this->hostname = hostname;
+}
 
-std::map<std::string, Channel >& Channels::getChannels() { return this->channels; }
+std::map<std::string, Channel>& Channels::getChannels(){ return this->channels; }
 
-int Channels::messageToChannel(User& user, std::string buffer)
-{
+int Channels::messageToChannel(User& user, std::string buffer) {
     std::string channelName = buffer.substr(1, buffer.find(' '));
     channelName = channelName.substr(0, channelName.length() - 1);
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
