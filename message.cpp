@@ -59,8 +59,7 @@ void Server::commandHandler(User &user)
     else if (!strncmp(msgBuffer.c_str(), "NICK ", 5))
         changeNick(&(msgBuffer[5]), user, 0);
     else if (!strncmp(msgBuffer.c_str(), "INVITE ", 7))
-    {//INVITE mbozzi #hh\xa
-    }
+        invite(msgBuffer.substr(7, msgBuffer.length() - 1), user);
     else if (!strncmp(msgBuffer.c_str(), "KICK ", 5))
     {//KICK #hh mbozzi :perchessi\xa
     }
@@ -154,4 +153,79 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         }
     }
     return 0;
+}
+
+bool Server::channelExist2(std::string channelName)
+{
+    std::map<std::string, Channel >::iterator it = channels.getChannels().find(channelName);
+    if (it == channels.getChannels().end())
+        return false;
+    else
+        return true;
+}
+
+int Server::findClient(std::vector <User> chClients, User user)
+{
+    std::vector <User> ::iterator it = chClients.begin();
+    for (int i = 0; it != chClients.end(); it++)
+    {;
+        if (*it == user)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
+int Server::findClientByName(std::vector <User> chClients, std::string name)
+{
+    std::vector <User> ::iterator it = chClients.begin();
+    for (int i = 0; it != chClients.end(); it++)
+    {
+        if (it->getNick() == name)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
+void Server::invite(std::string buffer, User &user)
+{
+    std::string name = buffer.substr(0, buffer.find(' '));
+    std::string channelName = buffer.substr(name.length() + 2, buffer.length() - name.length() - 3);
+    std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";//No such channel
+    std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";//You're not on that channel
+    std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";//You're not channel operator
+    std::string ERR_USERONCHANNEL = "ERR_USERONCHANNEL :" + user.getNick() + " " + name + " #" + channelName + " :is already on channel\r\n";
+    std::string RPL_INVITING = "RPL_INVITING: " + user.getNick() + " " + name + " #" + channelName + "\r\n";//to the issuer of the message 
+    std::string INVITE = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " INVITE " + name + " #" + channelName + "\r\n";//with the issuer as <source>, to target user
+
+    if (channelExist2(channelName) == false) 
+    {
+        send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), 0);
+        return ;
+    }
+    
+    std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
+    if (findClient(chClients, user) == -1)
+    {
+        send(user.getSocket(), ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), 0);
+        return ;
+    }
+
+    std::vector <User> chOper = ((channels.getChannels())[channelName]).operators;
+/*    if (findClient(chOper, user) == -1)// && if channel is invite only
+    {
+        send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
+        return ;
+    }*/
+
+    if (findClientByName(chClients, name) != -1)
+    {
+        send(user.getSocket(), ERR_USERONCHANNEL.c_str(), ERR_USERONCHANNEL.length(), 0);
+        return ;
+    }
+
+    User target = clients[findClientByName(clients, name)];
+    send(user.getSocket(), RPL_INVITING.c_str(), RPL_INVITING.length(), 0);
+    send(target.getSocket(), INVITE.c_str(), INVITE.length(), 0);
 }

@@ -60,6 +60,10 @@ private:
 	int messageToPrivate(User& user, std::string buffer);
 	void quit(char * buffer, User &user);
 	int changeNick(std::string buffer, User &user, int flag);
+	void invite(std::string buffer, User &user);
+	bool channelExist2(std::string channelName);
+	int findClient(std::vector <User> chClients, User user);
+	int findClientByName(std::vector <User> chClients, std::string name);
 
 public:
 	Server(const int& port, const std::string& password);

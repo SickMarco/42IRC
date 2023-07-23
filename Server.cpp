@@ -47,7 +47,7 @@ int Server::newClientConnected(User& user)
                 break;
             else
             {
-                std::string ERR_PASSWDMISMATCH = serverName + " PASSW_ERR :Password incorrect.\r\n";
+                std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
                 send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
                 
                 std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
