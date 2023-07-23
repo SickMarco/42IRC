@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 21:49:08 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 23:23:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ public:
 	int	messageToChannel(const User& user, std::string buffer);
 	void topic(const User& user, std::string buffer);
 	void setModeTopic(const User& user, const std::string& channelName, const std::string& flag);
+	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
 };
 
 
