@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 16:13:54 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 22:57:06 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,10 +138,8 @@ void Server::run() {
     {
         int ret = poll(fds, numClients + 1, 1000);
         if (ret < 0) {
-            if (errno == EINTR) {
-                perror("Poll error");
-                break;
-            }
+            perror("Poll error");
+            break;
         }
         else if (ret == 0)
             continue;
