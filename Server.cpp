@@ -50,7 +50,7 @@ int Server::newClientConnected(User& user)
                 std::string ERR_PASSWDMISMATCH = serverName + " PASSW_ERR :Password incorrect.\r\n";
                 send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
                 
-                std::string quitmsg = "ERROR :Closing Link: " + hostname + "\r\n";
+                std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
                 send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
                 
                 close(user.getSocket());
@@ -63,7 +63,7 @@ int Server::newClientConnected(User& user)
             }
         }
     }
-    while (user.getUser().empty())
+    while (user.getUser().empty() || user.getNick().empty())
     {   
         bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
         buffer[bytesRead] = '\0';
