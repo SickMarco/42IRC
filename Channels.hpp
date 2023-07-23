@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 16:28:20 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 23:23:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ private:
 	void joinMessageSequence(const User& user, const std::string& channelName);
 	void multiChannelJoin(User& user, std::string channelName);
 	void setTopic(const User& user, const std::string& channelName, const std::string& arg);
+	void sendToAll(const std::string& channelName, const std::string& message);
 
 public:
 	Channels();
@@ -49,6 +50,8 @@ public:
 	void leaveChannel(User& user, std::string channelName, std::string message);
 	int	messageToChannel(const User& user, std::string buffer);
 	void topic(const User& user, std::string buffer);
+	void setModeTopic(const User& user, const std::string& channelName, const std::string& flag);
+	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
 };
 
 

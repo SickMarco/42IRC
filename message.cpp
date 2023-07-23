@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 16:07:49 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 23:23:09 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,14 @@ void Server::commandHandler(User &user)
     else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
         channels.topic(user, removeCRLF(&msgBuffer[0]));
     else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
-    {//MODE #hh +o mabaffo\xa
+    {
+        std::string mode = findMode(msgBuffer);
+        if (mode.empty())
+            return ;
+        else if (mode.find('o') != std::string::npos)
+            channels.setModeOperator(user, msgBuffer, mode);
+        else if (mode.find('t') != std::string::npos)
+            channels.setModeTopic(user, std::strtok(&msgBuffer[6], " "), mode);
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 12:10:30 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:20:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 #include <unistd.h>
 #include <cstring>
 #include <stdio.h>
-#include <errno.h>
 #include <poll.h>
 #include <sstream>
 #include <map>
@@ -60,6 +59,7 @@ private:
 	int messageToPrivate(User& user, std::string buffer);
 	void quit(char * buffer, User &user);
 	int changeNick(std::string buffer, User &user, int flag);
+	std::string findMode(std::string buffer);
 	void invite(std::string buffer, User &user);
 	bool channelExist2(std::string channelName);
 	int findClient(std::vector <User> chClients, User user);

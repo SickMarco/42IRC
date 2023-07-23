@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 11:44:36 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 11:59:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 22:56:22 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,12 @@ Socket::~Socket(){}
 
 int Socket::getSocket() const { return this->serverSocket; }
 
-/**
- * @brief Socket init with non-blocking I/O
- * @throws Failed 
- * @throws Non-block
- * @throws Non reusable
- */
+//Socket init with non-blocking I/O
 void Socket::socketInit(std::string IP){
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0) 
 		throw std::runtime_error("Socket failed");
-	int flags = fcntl(serverSocket, F_GETFL, 0);
-    if (fcntl(serverSocket, F_SETFL, flags | O_NONBLOCK) < 0)
+    if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) < 0)
 		throw std::runtime_error("Socket non-blocking error");
 	int reuseAddr = 1;
     if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr)) < 0)

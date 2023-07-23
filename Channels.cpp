@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 16:30:04 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/23 22:54:07 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,15 @@ void Channels::init(const std::string& serverName, const std::string& hostname) 
 }
 
 std::map<std::string, Channel>& Channels::getChannels(){ return this->channels; }
+
+void Channels::sendToAll(const std::string& channelName, const std::string& message){
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    for (size_t i = 0; i < it->second.clients.size(); ++i) {
+        if (it->second.clients[i].getSocket() != -1) {
+            send(it->second.clients[i].getSocket(), message.c_str(), message.length(), 0);
+        }
+    }
+}
 
 int Channels::messageToChannel(const User& user, std::string buffer) {
     std::string channelName = buffer.substr(1, buffer.find(' '));
@@ -92,13 +101,9 @@ void Channels::joinMessageSequence(const User& user, const std::string& channelN
     std::string RPL_NAMREPLY = serverName + " 353 " + user.getNick() + " = #" + channelName + " :";
     std::string RPL_ENDOFNAMES = serverName + " 366 " + user.getNick() + " #" + channelName + " :End of NAMES list\r\n";
     // Send JOIN message to all users in the channel
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    for (size_t i = 0; i < it->second.clients.size(); ++i) {
-        if (it->second.clients[i].getSocket() != -1) {
-            send(it->second.clients[i].getSocket(), join.c_str(), join.length(), 0);
-        }
-    }
+    sendToAll(channelName, join);
     // Build RPL_NAMREPLY message
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
     std::vector<User>::iterator itUser = it->second.clients.begin();
     for (; itUser != it->second.clients.end(); ++itUser) {
         RPL_NAMREPLY += itUser->getNick();
@@ -179,21 +184,19 @@ bool Channels::checkOperator(const User& user, const std::string& channelName){
             if (userIt->getNick() == user.getNick())
                 return true;
         }
+        std::string ERR_CHANOPRIVSNEEDED = serverName + " 482 " + user.getNick() + " #" + channelName + " :You're not channel operator\r\n";
+        send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
     }
     return false;
 }
 
 void Channels::setTopic(const User& user, const std::string& channelName, const std::string& arg){
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
-    if (arg.empty()) {
-        it->second.topic = "";
-        return;
+    if (it != channels.end()) {
+        it->second.topic = arg;
+        std::string RPL_TOPICSET = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + arg + "\r\n";
+        sendToAll(channelName, RPL_TOPICSET);
     }
-    it->second.topic = arg;
-    std::string RPL_TOPICSET = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + arg + "\r\n";
-    std::vector<User>::iterator itUser = it->second.clients.begin();
-    for (; itUser != it->second.clients.end(); ++itUser)
-        send(itUser->getSocket(), RPL_TOPICSET.c_str(), RPL_TOPICSET.length(), 0);
 }
 
 void Channels::topic(const User& user, std::string buffer){
@@ -207,6 +210,7 @@ void Channels::topic(const User& user, std::string buffer){
     if (it != channels.end()){
         if (it->second.topic.empty() && !std::strchr(buffer.c_str(), ':')){
             std::string RPL_NOTOPIC = serverName + " 331 " + user.getNick() + " #" + channelName + " :No topic setted\r\n";
+            // SEND ?
         }
         else if (!std::strchr(buffer.c_str(), ':')){    //SEND TOPIC
             std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
@@ -214,12 +218,7 @@ void Channels::topic(const User& user, std::string buffer){
         }
         else if (it->second.topicMode == false)    //CHECK TOPIC MODE AND SET TOPIC
             setTopic(user, channelName, arg);
-        else if (it->second.topicMode == true && checkOperator(user, channelName)) {    //TOPIC MODE ON, CHECK OPERATOR AND SET TOPIC
+        else if (it->second.topicMode == true && checkOperator(user, channelName)) //TOPIC MODE ON, CHECK OPERATOR AND SET TOPIC
             setTopic(user, channelName, arg);
-        }
-        else {      //TOPIC MODE ON AND USER NOT OP
-            std::string ERR_CHANOPRIVSNEEDED = serverName + " 482 " + user.getNick() + " #" + channelName + " :You're not channel operator\r\n";
-            send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
-        }
     }
 }
