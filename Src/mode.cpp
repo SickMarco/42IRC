@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 18:09:36 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 18:54:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ std::string extractNick(const std::string& buffer) {
     if (startPos != std::string::npos) {
         size_t endPos = buffer.find('\n', startPos);
         if (endPos != std::string::npos) {
-            std::string username = buffer.substr(startPos + 3, endPos - endPos - 3);
+            std::string username = buffer.substr(startPos + 3, endPos - startPos - 3);
             return username;
         }
     }
@@ -53,8 +53,11 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 		return ;
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
+		int ind = Server::findClientByName(it->second.clients, newOper);
+		if (ind == -1)
+			return ;
 		if (!flag.compare("+o"))
-			it->second.operators.push_back(user);
+			it->second.operators.push_back(it->second.clients[ind]);
 		else if (!flag.compare("-o"))
 			it->second.operators.erase(std::find(it->second.operators.begin(), it->second.operators.end(), user));
 		std::string setOperator = serverName + " MODE #" + channelName + " " + flag + " " +  newOper + "\r\n";

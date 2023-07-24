@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 17:00:29 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 18:55:14 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,6 @@ private:
 	std::string findMode(std::string buffer);
 	void invite(std::string buffer, User &user);
 	bool channelExist2(std::string channelName);
-	int findClient(std::vector <User> chClients, User user);
-	int findClientByName(std::vector <User> chClients, std::string name);
 	void modeHandler(const User& user, std::string buffer);
 	void kick(std::string buffer, User &user);
 
@@ -72,6 +70,8 @@ public:
 	~Server();
 
 	void run();
+	static int findClient(std::vector <User> chClients, User user);
+	static int findClientByName(std::vector <User> chClients, std::string name);
 };
 
 std::string removeCRLF(const char* buffer);
