@@ -64,6 +64,7 @@ private:
 	bool channelExist2(std::string channelName);
 	int findClient(std::vector <User> chClients, User user);
 	int findClientByName(std::vector <User> chClients, std::string name);
+	void kick(std::string buffer, User &user);
 
 public:
 	Server(const int& port, const std::string& password);

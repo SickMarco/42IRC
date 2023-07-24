@@ -41,7 +41,6 @@ private:
 	void joinMessageSequence(const User& user, const std::string& channelName);
 	void multiChannelJoin(User& user, std::string channelName);
 	void setTopic(const User& user, const std::string& channelName, const std::string& arg);
-	void sendToAll(const std::string& channelName, const std::string& message);
 
 public:
 	Channels();
@@ -56,6 +55,7 @@ public:
 	void topic(const User& user, std::string buffer);
 	void setModeTopic(const User& user, const std::string& channelName, const std::string& flag);
 	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
+	void sendToAll(const std::string& channelName, const std::string& message);
 };
 
 
