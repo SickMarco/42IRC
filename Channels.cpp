@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 22:54:07 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 15:34:45 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,17 +54,20 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
 
 void Channels::joinChannel(User& user, std::string channelName) {
     //if channel is ivite only and the user has not been invited, abort joining
-    if (channels[channelName].inviteOnly == true &&
-        channels[channelName].invitelist.find(user.getNick()) == channels[channelName].invitelist.end())
+    std::map <std::string, Channel>::iterator it = channels.begin();
+    if (it != channels.end())
     {
+        if (it->second.inviteOnly == true &&
+            it->second.invitelist.find(user.getNick()) == it->second.invitelist.end())
+        {
 
+        }
+        //if user has been banned from channel, abort joining
+        if (it->second.banlist.find(user.getNick()) != it->second.banlist.end())
+        {
+
+        }
     }
-    //if user has been banned from channel, abort joining
-    if (channels[channelName].banlist.find(user.getNick()) != channels[channelName].banlist.end())
-    {
-
-    }
-
     bool setOp = false;
     if (std::strchr(channelName.c_str(), ','))
         multiChannelJoin(user, std::strtok(&channelName[0], " "));
@@ -139,6 +142,7 @@ void Channels::channelOperators(const User& user, const std::string& channelName
     if (setOp == true) {
         //Set first user as operator
         std::string setOperator = serverName + " MODE #" + channelName + " +o " + user.getNick() + "\r\n";
+        printStringNoP(setOperator.c_str(), setOperator.length());
         send(user.getSocket(), setOperator.c_str(), setOperator.length(), 0);
     }
     else {
