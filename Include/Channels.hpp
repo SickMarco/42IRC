@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 23:23:41 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 19:29:20 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ struct Channel {
 	std::vector<User> operators;
 	bool topicMode;
 	bool inviteOnly;
+	bool userLimit;
+	unsigned int userMax;
 	std::set <std::string> banlist;
 	std::set <std::string> invitelist;
 };
@@ -37,6 +39,7 @@ private:
 	bool channelExist(User& user, const std::string& channelName);
 	void createNewChannel(const User& user, const std::string& channelName, bool& setOp);
 	void channelOperators(const User& user, const std::string& channelName, bool& setOp);
+	int  checkChannelModes(const User& user, const std::string channelName);
 	bool checkOperator(const User& user, const std::string& channelName);
 	void joinMessageSequence(const User& user, const std::string& channelName);
 	void multiChannelJoin(User& user, std::string channelName);
@@ -57,6 +60,7 @@ public:
 	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
 	void sendToAll(const std::string& channelName, const std::string& message);
 	void setModeInviteOnly(const User& user, const std::string& channelName, const std::string& flag);
+	void setModeUserLimit(const User& user, std::string buffer, const std::string& flag);
 };
 
 #endif
