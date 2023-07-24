@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 21:20:54 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 15:51:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ private:
 	bool channelExist2(std::string channelName);
 	int findClient(std::vector <User> chClients, User user);
 	int findClientByName(std::vector <User> chClients, std::string name);
+	void modeHandler(const User& user, std::string buffer);
 	void kick(std::string buffer, User &user);
 
 public:

@@ -56,9 +56,7 @@ public:
 	void setModeTopic(const User& user, const std::string& channelName, const std::string& flag);
 	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
 	void sendToAll(const std::string& channelName, const std::string& message);
+	void setModeInviteOnly(const User& user, const std::string& channelName, const std::string& flag);
 };
-
-
-
 
 #endif

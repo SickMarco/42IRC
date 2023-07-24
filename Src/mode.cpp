@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 23:31:07 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 16:00:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,18 @@ std::string Server::findMode(std::string buffer){
         return mode;
     }
     return "";
+}
+
+void Server::modeHandler(const User& user, std::string buffer){
+	std::string mode = findMode(buffer);
+	if (mode.empty())
+		return ;
+	else if (mode.find('o') != std::string::npos)
+		channels.setModeOperator(user, buffer, mode);
+	else if (mode.find('t') != std::string::npos)
+		channels.setModeTopic(user, std::strtok(&buffer[6], " "), mode);
+	else if (mode.find('i') != std::string::npos)
+		channels.setModeInviteOnly(user, std::strtok(&buffer[6], " "), mode);
 }
 
 std::string extractUsername(const std::string& buffer) {
@@ -61,7 +73,23 @@ void Channels::setModeTopic(const User& user, const std::string& channelName, co
 			it->second.topicMode = false;
 		else
 			return ;
-		std::string message = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
-		sendToAll(channelName, message);
+		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
+		sendToAll(channelName, mode);
+	}
+}
+
+void Channels::setModeInviteOnly(const User& user, const std::string& channelName, const std::string& flag){
+	if (checkOperator(user, channelName) == false)
+		return ;
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	if (it != channels.end()){
+		if (!flag.compare("+i"))
+			it->second.inviteOnly = true;
+		else if (!flag.compare("-i"))
+			it->second.inviteOnly = false;
+		else
+			return ;
+		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
+		sendToAll(channelName, mode);
 	}
 }
