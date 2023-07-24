@@ -104,6 +104,7 @@ void Channels::createNewChannel(const User& user, const std::string& channelName
     newChannel.clients.push_back(user);
     newChannel.operators.push_back(user);
     newChannel.topicMode = false;
+    newChannel.inviteOnly = false;
     channels[channelName] = newChannel;
     setOp = true;
 }
