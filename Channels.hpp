@@ -14,6 +14,7 @@
 #define CHANNEL_HPP
 
 #include <iostream>
+#include <set>
 #include "User.hpp"
 
 struct Channel {
@@ -21,6 +22,9 @@ struct Channel {
 	std::vector<User> clients;
 	std::vector<User> operators;
 	bool topicMode;
+	bool inviteOnly = false;
+	std::set <std::string> banlist;
+	std::set <std::string> invitelist;
 };
 
 class Channels

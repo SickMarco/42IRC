@@ -53,6 +53,18 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
 }
 
 void Channels::joinChannel(User& user, std::string channelName) {
+    //if channel is ivite only and the user has not been invited, abort joining
+    if (channels[channelName].inviteOnly == true &&
+        channels[channelName].invitelist.find(user.getNick()) == channels[channelName].invitelist.end())
+    {
+
+    }
+    //if user has been banned from channel, abort joining
+    if (channels[channelName].banlist.find(user.getNick()) != channels[channelName].banlist.end())
+    {
+
+    }
+
     bool setOp = false;
     if (std::strchr(channelName.c_str(), ','))
         multiChannelJoin(user, std::strtok(&channelName[0], " "));

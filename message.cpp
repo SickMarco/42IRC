@@ -220,11 +220,16 @@ void Server::invite(std::string buffer, User &user)
     }
 
     std::vector <User> chOper = ((channels.getChannels())[channelName]).operators;
-/*    if (findClient(chOper, user) == -1)// && if channel is invite only
+    if ((channels.getChannels())[channelName].inviteOnly == true)
     {
-        send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
-        return ;
-    }*/
+        if (findClient(chOper, user) == -1)
+        {
+            send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
+            return ;
+        }
+        else
+            ((channels.getChannels())[channelName]).invitelist.insert(name);
+    }
 
     if (findClientByName(chClients, name) != -1)
     {
