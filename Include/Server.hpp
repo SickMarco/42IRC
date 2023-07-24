@@ -65,6 +65,7 @@ private:
 	int findClient(std::vector <User> chClients, User user);
 	int findClientByName(std::vector <User> chClients, std::string name);
 	void modeHandler(const User& user, std::string buffer);
+	void kick(std::string buffer, User &user);
 
 public:
 	Server(const int& port, const std::string& password);

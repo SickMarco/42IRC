@@ -61,8 +61,7 @@ void Server::commandHandler(User &user)
     else if (!strncmp(msgBuffer.c_str(), "INVITE ", 7))
         invite(msgBuffer.substr(7, msgBuffer.length() - 1), user);
     else if (!strncmp(msgBuffer.c_str(), "KICK ", 5))
-    {//KICK #hh mbozzi :perchessi\xa
-    }
+        kick(msgBuffer.substr(5, msgBuffer.length() - 1), user);
     else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
         channels.topic(user, removeCRLF(&msgBuffer[0]));
     else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
@@ -236,4 +235,55 @@ void Server::invite(std::string buffer, User &user)
     User target = clients[findClientByName(clients, name)];
     send(user.getSocket(), RPL_INVITING.c_str(), RPL_INVITING.length(), 0);
     send(target.getSocket(), INVITE.c_str(), INVITE.length(), 0);
+}
+
+void Server::kick(std::string buffer, User &user)
+{
+    std::string channelName = buffer.substr(1, buffer.find(' ') - 1);
+    buffer = buffer.substr(channelName.length() + 2, std::string::npos);
+    std::string name = buffer.substr( 0, buffer.find(' '));
+    buffer = buffer.substr(name.length() + 2, std::string::npos);
+    std::string mex = buffer.substr(0, buffer.length() - 1);
+    
+    std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+    std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";
+    std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+    std::string ERR_USERNOTINCHANNEL = "ERR_USERNOTINCHANNEL :" + user.getNick() +  " " + name + " #" + channelName + " :They aren't on that channel\r\n";
+    std::string err;
+    //:WiZ!jto@tolsun.oulu.fi KICK #Finnish John
+    std::string KICK = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " KICK #" + channelName + " " + name + " :" + mex + "\r\n"; 
+
+    if (channelExist2(channelName) == false) 
+    {
+        err = ERR_NOSUCHCHANNEL;
+        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        return ;
+    }
+    std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
+    if (findClient(chClients, user) == -1)
+    {
+        err = ERR_NOTONCHANNEL;
+        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        return ;
+    }
+    std::vector <User> chOper = ((channels.getChannels())[channelName]).operators;
+    if (findClient(chOper, user) == -1)
+    {
+        err = ERR_CHANOPRIVSNEEDED;
+        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        return ;
+    }
+    if (findClientByName(chClients, name) == -1)
+    {
+        err = ERR_USERNOTINCHANNEL;
+        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        return ;
+    }
+    channels.sendToAll(channelName, KICK);
+    
+    // Channel exists, remove the user from the channel participants
+    std::vector<User> & channelusers = ((channels.getChannels())[channelName]).clients;
+    channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
+    // Update user channel list
+    user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
 }
