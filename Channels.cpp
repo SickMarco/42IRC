@@ -55,9 +55,11 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
 void Channels::joinChannel(User& user, std::string channelName) {
     //if channel is ivite only and the user has not been invited, abort joining
     if (channels[channelName].inviteOnly == true &&
-        channels[channelName].invitelist.find(user.getNick()) == channels[channelName].invitelist.end())
+       channels[channelName].invitelist.find(user.getNick()) == channels[channelName].invitelist.end())
     {
-
+        std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
+        send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
+        return ;
     }
     //if user has been banned from channel, abort joining
     if (channels[channelName].banlist.find(user.getNick()) != channels[channelName].banlist.end())
