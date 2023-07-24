@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 16:00:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 18:09:36 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void Server::modeHandler(const User& user, std::string buffer){
 		channels.setModeInviteOnly(user, std::strtok(&buffer[6], " "), mode);
 }
 
-std::string extractUsername(const std::string& buffer) {
+std::string extractNick(const std::string& buffer) {
     size_t startPos = buffer.find_first_of("+-");
     if (startPos != std::string::npos) {
         size_t endPos = buffer.find('\n', startPos);
@@ -47,7 +47,7 @@ std::string extractUsername(const std::string& buffer) {
 }
 
 void Channels::setModeOperator(const User& user, std::string buffer, const std::string& flag){
-	std::string newOper = extractUsername(buffer);
+	std::string newOper = extractNick(buffer);
 	std::string channelName = std::strtok(&buffer[6], " ");
 	if (checkOperator(user, channelName) == false)
 		return ;

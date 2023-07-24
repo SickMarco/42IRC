@@ -6,22 +6,12 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 23:20:04 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 16:53:12 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "User.hpp"
-
-std::string trimMessage(const char* buffer, size_t startIndex){
-	std::string input = buffer;
-	std::string ret;
-	size_t endIndex = input.find('\n');
-    if (endIndex != std::string::npos){
-		ret = input.substr(startIndex, endIndex - 5);
-	}
-	return ret;
-}
 
 void printStringNoP(const char* str, std::size_t length) {
     for (std::size_t i = 0; i < length; ++i) {

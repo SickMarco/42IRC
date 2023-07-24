@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 22:57:06 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 17:36:02 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), se
 	skt.socketInit(IP);
 	skt.binding();
     channels.init(serverName, hostname);
-    std::cout << "SERVER IP: " << IP << std::endl;
+    std::cout << "SERVER IP: \033[0;35m" << IP << "\033[0;37m" << std::endl;
 }
 
 Server::~Server(){

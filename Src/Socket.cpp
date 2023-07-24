@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 11:44:36 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/23 22:56:22 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 17:54:55 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void Socket::socketInit(std::string IP){
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(IP.c_str());
     //controlla puliza serverAddr
+	std::cout << "Socket created" << std::endl;
+	sleep(1);
 }
 
 void Socket::binding(){
@@ -40,6 +42,8 @@ void Socket::binding(){
       throw std::runtime_error("Binding error");
     if (listen(serverSocket, SOMAXCONN) < 0)
        throw std::runtime_error("Listening error");
+	std::cout << "Socket address setted" << std::endl;
+	sleep(1);
 }
 
 void Socket::getMyIP(std::string& hostnm, std::string& IP){
@@ -54,5 +58,11 @@ void Socket::getMyIP(std::string& hostnm, std::string& IP){
 	if(!host_entry)
 		throw std::runtime_error("Host entry error");
     IP = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
-	std::memset(hostname, 0, sizeof(hostname)); 
+	std::memset(hostname, 0, sizeof(hostname));
+	std::cout << "Founding IP address";
+	for (int i = 0; i < 3; ++i){
+		std::cout << '.' << std::flush;
+		usleep(333000);
+	}
+	std::cout <<  "\r                         \rIP address detected"  << std::endl;
 }

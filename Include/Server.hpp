@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 15:51:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 17:00:29 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ public:
 	void run();
 };
 
-std::string trimMessage(const char* buffer, size_t startIndex);
 std::string removeCRLF(const char* buffer);
 void 		printStringNoP(const char* str, std::size_t length);
 

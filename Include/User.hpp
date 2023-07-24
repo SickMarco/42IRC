@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/22 12:10:22 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 16:53:18 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,9 @@
 
 #include <iostream>
 #include <string>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <cstring>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <errno.h>
-#include <poll.h>
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -59,7 +53,6 @@ public:
 	void setUser(std::string newUser);
 };
 
-std::string trimMessage(const char* buffer, size_t startIndex);
 std::string removeCRLF(const char* buffer);
 void 		printStringNoP(const char* str, std::size_t length);
 

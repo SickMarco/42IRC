@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 16:02:32 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 18:10:30 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,10 @@ void Server::commandHandler(User &user)
         channels.topic(user, removeCRLF(&msgBuffer[0]));
     else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
         modeHandler(user, msgBuffer);
-    /*   else if (strncmp(msgBuffer.c_str(), "WHO ", 4) && strncmp(msgBuffer.c_str(), "USERHOST ", 9)){
+    else if (strncmp(msgBuffer.c_str(), "WHO ", 4) && strncmp(msgBuffer.c_str(), "USERHOST ", 9)){
         std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&msgBuffer[0]) + " :Unknown command\r\n";
-        printStringNoP(ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length());
         send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), 0);
-    } */
+    }
 }
 
 int Server::messageToPrivate(User& user, std::string buffer)

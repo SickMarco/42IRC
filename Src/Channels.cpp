@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 15:34:45 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 18:11:13 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,11 @@ void Channels::joinChannel(User& user, std::string channelName) {
         }
     }
     bool setOp = false;
-    if (std::strchr(channelName.c_str(), ','))
+    if (channelName.find(',') != channelName.npos)
         multiChannelJoin(user, std::strtok(&channelName[0], " "));
     else
     {
-        if (std::strchr(channelName.c_str(), ' '))
+        if (channelName.find(' ') != channelName.npos)
             channelName = std::strtok(&channelName[0], " ");
         if (!channelExist(user, channelName))
             createNewChannel(user, channelName, setOp);
@@ -132,33 +132,11 @@ void Channels::joinMessageSequence(const User& user, const std::string& channelN
         std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
         send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
     }
-    else {
-        std::string RPL_NOTOPIC = serverName + " 331 " + user.getNick() + " #" + channelName + " :No topic setted\r\n";
-        send(user.getSocket(), RPL_NOTOPIC.c_str(), RPL_NOTOPIC.length(), 0);
-    }
     send(user.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
     send(user.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
 }
 
-void Channels::channelOperators(const User& user, const std::string& channelName, bool& setOp){
-    if (setOp == true) {
-        //Set first user as operator
-        std::string setOperator = serverName + " MODE #" + channelName + " +o " + user.getNick() + "\r\n";
-        printStringNoP(setOperator.c_str(), setOperator.length());
-        send(user.getSocket(), setOperator.c_str(), setOperator.length(), 0);
-    }
-    else {
-        //Notify all user of channels operators
-        std::map<std::string, Channel >::iterator it = channels.find(channelName);
-        std::vector<User>::iterator opIt = it->second.operators.begin();
-        for (; opIt != it->second.operators.end(); ++opIt) {
-            std::string sendOperator = serverName + " MODE #" + channelName + " +o " + opIt->getNick() + "\r\n";
-            send(user.getSocket(), sendOperator.c_str(), sendOperator.length(), 0);
-        }
-    }
-}
-
- void Channels::multiChannelJoin(User& user, std::string channelName){
+void Channels::multiChannelJoin(User& user, std::string channelName){
     std::vector<std::string> splitChannel;
     size_t pos = 0;
     size_t next;
@@ -195,6 +173,23 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
     }
 }
 
+void Channels::channelOperators(const User& user, const std::string& channelName, bool& setOp){
+    if (setOp == true) {
+        //Set first user as operator
+        std::string setOperator = serverName + " MODE #" + channelName + " +o " + user.getNick() + "\r\n";
+        send(user.getSocket(), setOperator.c_str(), setOperator.length(), 0);
+    }
+    else {
+        //Notify all user of channels operators
+        std::map<std::string, Channel >::iterator it = channels.find(channelName);
+        std::vector<User>::iterator opIt = it->second.operators.begin();
+        for (; opIt != it->second.operators.end(); ++opIt) {
+            std::string sendOperator = serverName + " MODE #" + channelName + " +o " + opIt->getNick() + "\r\n";
+            send(user.getSocket(), sendOperator.c_str(), sendOperator.length(), 0);
+        }
+    }
+}
+
 bool Channels::checkOperator(const User& user, const std::string& channelName){
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
     if (it != channels.end()){
@@ -227,11 +222,7 @@ void Channels::topic(const User& user, std::string buffer){
 
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
     if (it != channels.end()){
-        if (it->second.topic.empty() && !std::strchr(buffer.c_str(), ':')){
-            std::string RPL_NOTOPIC = serverName + " 331 " + user.getNick() + " #" + channelName + " :No topic setted\r\n";
-            // SEND ?
-        }
-        else if (!std::strchr(buffer.c_str(), ':')){    //SEND TOPIC
+        if (buffer.find(':') == std::string::npos){    //SEND TOPIC
             std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
             send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
         }
