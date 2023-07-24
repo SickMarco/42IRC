@@ -25,6 +25,7 @@ struct Channel {
 	bool inviteOnly;
 	std::set <std::string> banlist;
 	std::set <std::string> invitelist;
+	std::string passKey;
 };
 
 class Channels
@@ -57,6 +58,8 @@ public:
 	void setModeOperator(const User& user, std::string buffer, const std::string& flag);
 	void sendToAll(const std::string& channelName, const std::string& message);
 	void setModeInviteOnly(const User& user, const std::string& channelName, const std::string& flag);
+	void setModeKey(const User& user, std::string buffer, std::string mode);
+	bool channelExist2(std::string channelName);
 };
 
 #endif

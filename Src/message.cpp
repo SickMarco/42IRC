@@ -157,15 +157,6 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     return 0;
 }
 
-bool Server::channelExist2(std::string channelName)
-{
-    std::map<std::string, Channel >::iterator it = channels.getChannels().find(channelName);
-    if (it == channels.getChannels().end())
-        return false;
-    else
-        return true;
-}
-
 int Server::findClient(std::vector <User> chClients, User user)
 {
     std::vector <User> ::iterator it = chClients.begin();
@@ -201,7 +192,7 @@ void Server::invite(std::string buffer, User &user)
     std::string RPL_INVITING = "RPL_INVITING: " + user.getNick() + " " + name + " #" + channelName + "\r\n";//to the issuer of the message 
     std::string INVITE = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " INVITE " + name + " #" + channelName + "\r\n";//with the issuer as <source>, to target user
 
-    if (channelExist2(channelName) == false) 
+    if (channels.channelExist2(channelName) == false) 
     {
         send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), 0);
         return ;
@@ -250,10 +241,9 @@ void Server::kick(std::string buffer, User &user)
     std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_USERNOTINCHANNEL = "ERR_USERNOTINCHANNEL :" + user.getNick() +  " " + name + " #" + channelName + " :They aren't on that channel\r\n";
     std::string err;
-    //:WiZ!jto@tolsun.oulu.fi KICK #Finnish John
     std::string KICK = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " KICK #" + channelName + " " + name + " :" + mex + "\r\n"; 
 
-    if (channelExist2(channelName) == false) 
+    if (channels.channelExist2(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
         send(user.getSocket(),  err.c_str(), err.length(), 0);

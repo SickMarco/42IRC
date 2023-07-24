@@ -52,7 +52,9 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
     return 0;
 }
 
-void Channels::joinChannel(User& user, std::string channelName) {
+void Channels::joinChannel(User& user, std::string buffer) {
+    std::string channelName = buffer.substr(0, buffer.find(' '));
+    std::string key = buffer.substr(channelName.length(), buffer.npos);
     //if channel is ivite only and the user has not been invited, abort joining
     std::map <std::string, Channel>::iterator it = channels.begin();
     if (it != channels.end())
@@ -60,15 +62,12 @@ void Channels::joinChannel(User& user, std::string channelName) {
         if (it->second.inviteOnly == true &&
            it->second.invitelist.find(user.getNick()) == it->second.invitelist.end())
         {
-        std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
-        send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
-        return ;
+            std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
+            send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
+            return ;
         }
-        //if user has been banned from channel, abort joining
-        if (it->second.banlist.find(user.getNick()) != it->second.banlist.end())
-        {
-
-        }
+       
+        if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
     }
     bool setOp = false;
     if (channelName.find(',') != channelName.npos)
@@ -231,4 +230,13 @@ void Channels::topic(const User& user, std::string buffer){
         else if (it->second.topicMode == true && checkOperator(user, channelName)) //TOPIC MODE ON, CHECK OPERATOR AND SET TOPIC
             setTopic(user, channelName, arg);
     }
+}
+
+bool Channels::channelExist2(std::string channelName)
+{
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    if (it == channels.end())
+        return false;
+    else
+        return true;
 }

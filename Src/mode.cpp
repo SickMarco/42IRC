@@ -32,6 +32,8 @@ void Server::modeHandler(const User& user, std::string buffer){
 		channels.setModeTopic(user, std::strtok(&buffer[6], " "), mode);
 	else if (mode.find('i') != std::string::npos)
 		channels.setModeInviteOnly(user, std::strtok(&buffer[6], " "), mode);
+	else if (mode.find('k') != std::string::npos)
+		channels.setModeKey(user, &(buffer[6]), mode);
 }
 
 std::string extractNick(const std::string& buffer) {
@@ -95,4 +97,27 @@ void Channels::setModeInviteOnly(const User& user, const std::string& channelNam
 		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
 		sendToAll(channelName, mode);
 	}
+}
+//MODE #me +k dio\xa
+void Channels::setModeKey(const User& user, std::string buffer, std::string mode)
+{
+	std::string channelName = buffer.substr(0, buffer.find(' '));
+	std::string chPass = buffer.substr(buffer.find(mode) + 3, buffer.npos);
+	chPass = chPass.substr(0, chPass.length() - 1);
+	std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+	std::string err;
+
+	if (channelExist2(channelName) == false) 
+    {
+        err = ERR_NOSUCHCHANNEL;
+        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        return ;
+    }
+	if (checkOperator(user, channelName) == false)
+		return ;
+	
+	if (mode == "+k")
+		channels[channelName].passKey = chPass;
+	else if (mode == "-k")
+		channels[channelName].passKey.clear();
 }
