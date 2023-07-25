@@ -130,12 +130,11 @@ void Channels::setModeUserLimit(const User& user, std::string buffer, const std:
 		sendToAll(channelName, mode);
 	}
 }
-//MODE #me +k dio\xa
+
 void Channels::setModeKey(const User& user, std::string buffer, std::string mode)
 {
 	std::string channelName = buffer.substr(0, buffer.find(' '));
-	std::string chPass = buffer.substr(buffer.find(mode) + 3, buffer.npos);
-	chPass = chPass.substr(0, chPass.length() - 1);
+	std::string chPass;
 	std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
 	std::string err;
 
@@ -149,7 +148,14 @@ void Channels::setModeKey(const User& user, std::string buffer, std::string mode
 		return ;
 	
 	if (mode == "+k")
+	{
+		chPass = buffer.substr(buffer.find(mode) + 3, buffer.npos);
+		chPass = chPass.substr(0, chPass.length() - 1);
 		channels[channelName].passKey = chPass;
+	}
 	else if (mode == "-k")
 		channels[channelName].passKey.clear();
+
+	std::string msg = serverName + " 324 " + user.getNick() + " #" + channelName + " " + mode + " :" + chPass + "\r\n";
+	sendToAll(channelName, msg);
 }

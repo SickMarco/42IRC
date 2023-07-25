@@ -55,26 +55,24 @@ int Channels::joinChannel(User& user, std::string channelName, std::string key)
             send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
             return 1;
         }
+
+        if ((!channels[channelName].passKey.empty()) && channels[channelName].passKey != key)
+        {
+        //    std::cout << "'" << channels[channelName].passKey << "'  '" << key << std::endl;
+            std::string ERR_BADCHANNELKEY = "ERR_BADCHANNELKEY :" + user.getNick() + " #" + channelName + ":Cannot join channel (+k)\r\n";
+            send(user.getSocket(), ERR_BADCHANNELKEY.c_str(), ERR_BADCHANNELKEY.length(), 0);
+            return 1;
+        }
     }
 
-//    if (!channels[channelName].passKey.empty() && channels[channelName].passKey != key)
-    {
- //       return 1;
-    }(void)key;
-
     bool setOp = false;
-//    if (channelName.find(',') != channelName.npos)
-//        multiChannelJoin(user, std::strtok(&channelName[0], " "));
-//    else
-//    {
-        if (channelName.find(' ') != channelName.npos)
-            channelName = std::strtok(&channelName[0], " ");
-        if (!channelExist(user, channelName))
-            createNewChannel(user, channelName, setOp);
-        user.getChannels().push_back(channelName);
-        joinMessageSequence(user, channelName);
-        channelOperators(user, channelName, setOp);
-//    }
+    if (channelName.find(' ') != channelName.npos)
+        channelName = std::strtok(&channelName[0], " ");
+    if (!channelExist(user, channelName))
+        createNewChannel(user, channelName, setOp);
+    user.getChannels().push_back(channelName);
+    joinMessageSequence(user, channelName);
+    channelOperators(user, channelName, setOp);
     return 0;
 }
 
