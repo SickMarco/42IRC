@@ -57,10 +57,10 @@ int Channels::joinChannel(User& user, std::string channelName, std::string key)
         }
     }
 
-    if (!channels[channelName].passKey.empty() && channels[channelName].passKey != key)
+//    if (!channels[channelName].passKey.empty() && channels[channelName].passKey != key)
     {
-        return ;
-    }
+ //       return 1;
+    }(void)key;
 
     bool setOp = false;
 //    if (channelName.find(',') != channelName.npos)

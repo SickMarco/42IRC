@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 19:36:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:53:51 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,31 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
                 send(channelClients[i].getSocket(), privmsg.c_str(), privmsg.length(), 0);
         }
         return 1;
+    }
+    return 0;
+}
+
+int  Channels::checkChannelModes(const User& user, const std::string channelName){
+    std::map <std::string, Channel>::iterator it = channels.find(channelName);
+    if (it != channels.end())
+    {
+        if (it->second.inviteOnly == true &&
+           it->second.invitelist.find(user.getNick()) == it->second.invitelist.end())
+        {
+            std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
+            send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
+            return 1;
+        }
+        //if user has been banned from channel, abort joining
+    /*     if (it->second.banlist.find(user.getNick()) != it->second.banlist.end())
+        {
+
+        } */
+        if (it->second.userLimit == true && it->second.userMax == it->second.clients.size()){
+            std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
+            send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
+            return 1;
+        }
     }
     return 0;
 }
