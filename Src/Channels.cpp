@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 17:26:30 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:37:35 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,8 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
     return 0;
 }
 
-int  Channels::checkChannelModes(const User& user, const std::string channelName){
+int  Channels::checkChannelModes(const User& user, const std::string channelName, const std::string& key){
+    //if channel is ivite only and the user has not been invited, abort joining
     std::map <std::string, Channel>::iterator it = channels.find(channelName);
     if (it != channels.end())
     {
@@ -63,14 +64,18 @@ int  Channels::checkChannelModes(const User& user, const std::string channelName
             send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
             return 1;
         }
-        //if user has been banned from channel, abort joining
-    /*     if (it->second.banlist.find(user.getNick()) != it->second.banlist.end())
-        {
-
-        } */
+    //    if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
         if (it->second.userLimit == true && it->second.userMax == it->second.clients.size()){
             std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
             send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
+            return 1;
+        }
+
+        if ((!channels[channelName].passKey.empty()) && channels[channelName].passKey != key)
+        {
+        //    std::cout << "'" << channels[channelName].passKey << "'  '" << key << std::endl;
+            std::string ERR_BADCHANNELKEY = "ERR_BADCHANNELKEY :" + user.getNick() + " #" + channelName + ":Cannot join channel (+k)\r\n";
+            send(user.getSocket(), ERR_BADCHANNELKEY.c_str(), ERR_BADCHANNELKEY.length(), 0);
             return 1;
         }
     }
@@ -170,7 +175,7 @@ void Channels::topic(const User& user, std::string buffer){
     }
 }
 
-bool Channels::channelExist2(std::string channelName)
+bool Channels::channelExist(std::string channelName)
 {
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
     if (it == channels.end())

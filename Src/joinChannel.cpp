@@ -38,37 +38,14 @@ void Channels::multiChannelJoin(User& user, std::string buffer)
 
 int Channels::joinChannel(User& user, std::string channelName, std::string key)
 {
-    //if channel is ivite only and the user has not been invited, abort joining
-    std::map <std::string, Channel>::iterator it = channels.find(channelName);
-    if (it != channels.end())
-    {
-        if (it->second.inviteOnly == true &&
-           it->second.invitelist.find(user.getNick()) == it->second.invitelist.end())
-        {
-            std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
-            send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
-            return 1;
-        }
-    //    if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
-        if (it->second.userLimit == true && it->second.userMax == it->second.clients.size()){
-            std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
-            send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
-            return 1;
-        }
-
-        if ((!channels[channelName].passKey.empty()) && channels[channelName].passKey != key)
-        {
-        //    std::cout << "'" << channels[channelName].passKey << "'  '" << key << std::endl;
-            std::string ERR_BADCHANNELKEY = "ERR_BADCHANNELKEY :" + user.getNick() + " #" + channelName + ":Cannot join channel (+k)\r\n";
-            send(user.getSocket(), ERR_BADCHANNELKEY.c_str(), ERR_BADCHANNELKEY.length(), 0);
-            return 1;
-        }
-    }
-
+    if (checkChannelModes(user, channelName, key))
+        return 1;
     bool setOp = false;
     if (channelName.find(' ') != channelName.npos)
         channelName = std::strtok(&channelName[0], " ");
-    if (!channelExist(user, channelName))
+    if (channelExist(channelName) == true)
+        addUserToChannel(user, channelName);
+    else
         createNewChannel(user, channelName, setOp);
     user.getChannels().push_back(channelName);
     joinMessageSequence(user, channelName);
@@ -76,7 +53,7 @@ int Channels::joinChannel(User& user, std::string channelName, std::string key)
     return 0;
 }
 
-bool Channels::channelExist(User& user, std::string channelName)
+void Channels::addUserToChannel(User& user, std::string channelName)
 {
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
     if (it != channels.end()) {
@@ -90,9 +67,7 @@ bool Channels::channelExist(User& user, std::string channelName)
         }
         if (userIt == it->second.clients.end())
             it->second.clients.push_back(user);
-        return true;
     }
-    return false;
 }
 
 void Channels::joinMessageSequence(const User& user, const std::string& channelName) {

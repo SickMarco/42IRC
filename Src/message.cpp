@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 16:48:15 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:43:11 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,30 +156,6 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     return 0;
 }
 
-int Server::findClient(std::vector <User> chClients, User user)
-{
-    std::vector <User> ::iterator it = chClients.begin();
-    for (int i = 0; it != chClients.end(); it++)
-    {;
-        if (*it == user)
-            return i;
-        i++;
-    }
-    return -1;
-}
-
-int Server::findClientByName(std::vector <User> chClients, std::string name)
-{
-    std::vector <User> ::iterator it = chClients.begin();
-    for (int i = 0; it != chClients.end(); it++)
-    {
-        if (it->getNick() == name)
-            return i;
-        i++;
-    }
-    return -1;
-}
-
 void Server::invite(std::string buffer, User &user)
 {
     std::string name = buffer.substr(0, buffer.find(' '));
@@ -191,7 +167,7 @@ void Server::invite(std::string buffer, User &user)
     std::string RPL_INVITING = "RPL_INVITING: " + user.getNick() + " " + name + " #" + channelName + "\r\n";//to the issuer of the message 
     std::string INVITE = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " INVITE " + name + " #" + channelName + "\r\n";//with the issuer as <source>, to target user
 
-    if (channels.channelExist2(channelName) == false) 
+    if (channels.channelExist(channelName) == false) 
     {
         send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), 0);
         return ;
@@ -242,7 +218,7 @@ void Server::kick(std::string buffer, User &user)
     std::string err;
     std::string KICK = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " KICK #" + channelName + " " + name + " :" + mex + "\r\n"; 
 
-    if (channels.channelExist2(channelName) == false) 
+    if (channels.channelExist(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
         send(user.getSocket(),  err.c_str(), err.length(), 0);

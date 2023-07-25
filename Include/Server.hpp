@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 17:30:47 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:43:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,11 @@ public:
 	~Server();
 
 	void run();
-	static int findClient(std::vector <User> chClients, User user);
-	static int findClientByName(std::vector <User> chClients, std::string name);
 };
 
 std::string removeCRLF(const char* buffer);
 void 		printStringNoP(const char* str, std::size_t length);
+int 		findClient(std::vector <User> chClients, User user);
+int 		findClientByName(std::vector <User> chClients, std::string name);
 
 #endif
