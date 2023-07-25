@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 19:24:08 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:07:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,23 @@ void Channels::setModeInviteOnly(const User& user, const std::string& channelNam
 
 void Channels::setModeUserLimit(const User& user, std::string buffer, const std::string& flag){
 	std::string channelName = std::strtok(&buffer[6], " ");
-	size_t n = buffer.find_first_of("0123456789");
-	if (n == buffer.npos)
-		return;
-	int max = atoi(std::strtok(&buffer[n], "\n"));
+	std::string maxStr , mode;
+	int max;
 	if (checkOperator(user, channelName) == false)
 		return ;
+	size_t n = buffer.find_first_of("0123456789");
+	if (n == buffer.npos && !flag.compare("+l")) {
+		std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + flag + " :Not enough parameters\r\n";
+		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), 0);
+		return;
+	}
+	else if (!flag.compare("+l")){
+		max = atoi(std::strtok(&buffer[n], "\n"));
+		std::stringstream ss;
+    	ss << max;
+    	maxStr = ss.str();
+		mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + " " + maxStr + "\r\n";
+	}
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
 		if (!flag.compare("+l")) {
@@ -118,19 +129,14 @@ void Channels::setModeUserLimit(const User& user, std::string buffer, const std:
 		else if (!flag.compare("-l")) {
 			it->second.userLimit = false;
 			it->second.userMax = 0;
+			mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n"; 
 		}
 		else
 			return ;
-		std::stringstream ss;
-    	ss << max;
-    	std::string maxStr = ss.str();
-
-		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + " " + maxStr + "\r\n";
-		printStringNoP(mode.c_str(), mode.length());
 		sendToAll(channelName, mode);
 	}
 }
-//MODE #me +k dio\xa
+
 void Channels::setModeKey(const User& user, std::string buffer, std::string mode)
 {
 	std::string channelName = buffer.substr(0, buffer.find(' '));

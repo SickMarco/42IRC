@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/21 18:26:21 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 20:28:07 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,3 +46,5 @@ User&  User::operator=(const User& src){
 	}
 	return *this;
 }
+
+char (&User::getBuffer())[1024] { return this->buffer; }

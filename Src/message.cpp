@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 18:10:30 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 16:48:15 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,6 @@ void Server::quit(char * buffer, User &user)
 
 int Server::changeNick(std::string buffer, User &user, int flag)
 {
-    buffer = buffer.substr(0, buffer.length() - 1);
     std::vector <User> ::iterator it = clients.begin();
     for (; it != clients.end(); it++)
     {
