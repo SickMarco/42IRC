@@ -272,7 +272,8 @@ void Server::kick(std::string buffer, User &user)
     
     // Channel exists, remove the user from the channel participants
     std::vector<User> & channelusers = ((channels.getChannels())[channelName]).clients;
-    channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
+    User & target = channelusers[findClientByName(channelusers, name)];
+    channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), target), channelusers.end());
     // Update user channel list
-    user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
+    user.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
 }
