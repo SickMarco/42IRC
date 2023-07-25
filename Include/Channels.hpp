@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 19:29:20 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:46:36 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ public:
 	void init(const std::string& serverName, const std::string& hostname);	
 	std::map<std::string, Channel>& getChannels();
 
-	int joinChannel(User& user, std::string buffer);
+	void joinChannel(User& user, std::string channelName);
 	void leaveChannel(User& user, std::string channelName, std::string message);
 	int	messageToChannel(const User& user, std::string buffer);
 	void topic(const User& user, std::string buffer);
