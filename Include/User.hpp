@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 16:53:18 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 20:28:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ private:
 	std::string host;
 	std::string ServerIP;
 	std::vector <std::string> channelsJoined;
+	char buffer[1024];
 
 public:
 	User();
@@ -51,6 +52,7 @@ public:
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);
+	char (&getBuffer())[1024];
 };
 
 std::string removeCRLF(const char* buffer);

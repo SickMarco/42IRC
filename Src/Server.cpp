@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 17:36:02 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 17:31:45 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,58 +29,7 @@ Server::~Server(){
 	close(skt.getSocket());
 }
 
-int Server::newClientConnected(User& user)
-{
-	user.setIP(IP);
-    char buffer[1024];
-    ssize_t bytesRead;
-    while (1)
-    {
-        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-        buffer[bytesRead] = '\0';
-		printStringNoP(buffer, strlen(buffer));
-        if  (!strncmp(buffer, "PASS", 4))
-        {
-            std::string psw = std::string(&(buffer[6]));
-            psw = psw.substr(0, psw.length() - 1);
-            if (psw == serverPassword || serverPassword.empty())
-                break;
-            else
-            {
-                std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
-                send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
-                
-                std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
-                send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
-                
-                close(user.getSocket());
-                user.setSocket(-1);
-                user.setNick("");
-                user.setUser("");
-                user.setIP("");
-
-                return 1;
-            }
-        }
-    }
-    while (user.getUser().empty() || user.getNick().empty())
-    {   
-        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-        buffer[bytesRead] = '\0';
-		printStringNoP(buffer, strlen(buffer));
-        if (!strncmp(buffer, "NICK ", 5))
-        {
-            changeNick(&(buffer[5]), user, 1);
-            std::memset(buffer, 0, sizeof(buffer));
-		}
-        else if (!strncmp(buffer, "USER", 4))
-        {
-            std::string s = std::strtok(&buffer[5], " ");
-            user.setUser(s.substr(0, s.length()));
-            std::cout << "USER: " << user.getUser() << std::endl;
-        }
-    }
-
+void Server::welcomeMsg(const User& user){
     std::string RPL_WELCOME = serverName + " 001 " + user.getNick() + " :Welcome to the Internet Relay Network " + user.getNick() + "\r\n";
     std::string RPL_YOURHOST = serverName + " 002 " + user.getNick() + " :Hosted by Frat Carnal, running version 0.42\r\n";
     std::string RPL_CREATED = serverName + " 003 " + user.getNick() + " :This server was created on 2023/07/19\r\n";
@@ -91,7 +40,58 @@ int Server::newClientConnected(User& user)
     send(user.getSocket(), RPL_CREATED.c_str(), RPL_CREATED.length(), 0);
     send(user.getSocket(), RPL_MOTD.c_str(), RPL_MOTD.length(), 0);
     send(user.getSocket(), RPL_ENDOFMOTD.c_str(), RPL_ENDOFMOTD.length(), 0);
+}
 
+bool Server::checkPassword(User& user, const std::string& PASS){
+    if (PASS != serverPassword && !serverPassword.empty())
+    {
+        std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
+        send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
+        std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
+        send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+        
+        close(user.getSocket());
+        user.setSocket(-1);
+        user.setNick("");
+        user.setUser("");
+        user.setIP("");
+        return false;
+    }
+    return true;
+}
+
+int Server::newClientConnected(User& user)
+{
+    ssize_t bytesRead;
+    std::string newClientMessage;
+	user.setIP(IP);
+    while (1)
+    {
+        bytesRead = recv(user.getSocket(), user.getBuffer(), sizeof(user.getBuffer()) - 1, 0);
+        user.getBuffer()[bytesRead] = '\0';
+        newClientMessage += user.getBuffer();
+        memset(user.getBuffer(), 0, 1024);
+        if (newClientMessage.find("\nPASS") != newClientMessage.npos &&
+            newClientMessage.find("\nNICK") != newClientMessage.npos &&
+            newClientMessage.find("\nUSER") != newClientMessage.npos)
+                break;
+    }
+	printStringNoP(newClientMessage.c_str(), newClientMessage.length());
+    size_t idx = newClientMessage.find(":");
+    std::string PASS = newClientMessage.substr(idx + 1, newClientMessage.find('\n', idx) - idx - 1);
+    if (checkPassword(user, PASS) == false)
+        return 1;
+    idx = newClientMessage.find("NICK");
+    if (idx == newClientMessage.npos)
+        return 1;
+    std::string NICK = newClientMessage.substr(idx + 5, newClientMessage.find_first_of('\n', idx + 5) - (idx + 5));
+    changeNick(NICK, user, 1);
+    idx = newClientMessage.find("USER");
+    if (idx == newClientMessage.npos)
+        return 1;
+    std::string USER = newClientMessage.substr(idx + 5, newClientMessage.find_first_of(' ', idx + 5) - (idx + 5));
+    user.setUser(USER);
+    welcomeMsg(user);
     return 0;
 }
 

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 11:44:36 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 17:54:55 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/24 20:09:48 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ void Socket::socketInit(std::string IP){
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(IP.c_str());
-    //controlla puliza serverAddr
 	std::cout << "Socket created" << std::endl;
 	sleep(1);
 }
