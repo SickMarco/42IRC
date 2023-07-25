@@ -37,8 +37,8 @@ void Server::messageHandler(User& user)
 
 void Server::commandHandler(User &user)
 {
-    if(!strncmp(msgBuffer.c_str(), "JOIN #", 6))
-			channels.joinChannel(user, removeCRLF(&(msgBuffer[6])));
+    if(!strncmp(msgBuffer.c_str(), "JOIN ", 5))
+			channels.multiChannelJoin(user, removeCRLF(&(msgBuffer[5])));
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
         channels.messageToChannel(user, removeCRLF(&(msgBuffer[8])));
     else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))

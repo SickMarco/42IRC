@@ -52,100 +52,6 @@ int Channels::messageToChannel(const User& user, std::string buffer) {
     return 0;
 }
 
-int Channels::joinChannel(User& user, std::string buffer) {
-    std::string channelName = buffer.substr(0, buffer.find(' '));
-    std::string key = buffer.substr(channelName.length(), buffer.npos);
-    //if channel is ivite only and the user has not been invited, abort joining
-    std::map <std::string, Channel>::iterator it = channels.find(channelName);
-    if (it != channels.end())
-    {
-        if (it->second.inviteOnly == true &&
-           it->second.invitelist.find(user.getNick()) == it->second.invitelist.end())
-        {
-            std::string ERR_INVITEONLYCHAN = "ERR_INVITEONLYCHAN " + user.getNick() +  " #" + channelName + " :Cannot join channel (+i)\r\n";
-            send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
-            return 1;
-        }
-        if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
-        if (it->second.userLimit == true && it->second.userMax == it->second.clients.size()){
-            std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
-            send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-bool Channels::channelExist(User& user, const std::string& channelName){
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    if (it != channels.end()) {
-        // Channel exists, add the user to the channel participants
-        std::vector<User>::iterator userIt = it->second.clients.begin();
-        for (; userIt != it->second.clients.end(); ++userIt) {
-            if (userIt->getNick() == user.getNick()) {
-                *userIt = user;
-                break;
-            }
-        }
-        if (userIt == it->second.clients.end())
-            it->second.clients.push_back(user);
-        return true;
-    }
-    return false;
-}
-
-void Channels::createNewChannel(const User& user, const std::string& channelName, bool& setOp){
-    // Channel doesn't exist, create a new channel and add the user
-    Channel newChannel;                           
-    newChannel.clients.push_back(user);
-    newChannel.operators.push_back(user);
-    newChannel.topicMode = false;
-    newChannel.inviteOnly = false;
-    newChannel.userLimit = false;
-    newChannel.userMax = 0;
-    channels[channelName] = newChannel;
-    setOp = true;
-}
-
-void Channels::joinMessageSequence(const User& user, const std::string& channelName) {
-    std::string join = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " JOIN #" + channelName + "\r\n";
-    std::string RPL_NAMREPLY = serverName + " 353 " + user.getNick() + " = #" + channelName + " :";
-    std::string RPL_ENDOFNAMES = serverName + " 366 " + user.getNick() + " #" + channelName + " :End of NAMES list\r\n";
-    // Send JOIN message to all users in the channel
-    sendToAll(channelName, join);
-    // Build RPL_NAMREPLY message
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    std::vector<User>::iterator itUser = it->second.clients.begin();
-    for (; itUser != it->second.clients.end(); ++itUser) {
-        RPL_NAMREPLY += itUser->getNick();
-        ((itUser + 1) != it->second.clients.end()) ? RPL_NAMREPLY += " " : RPL_NAMREPLY += "\r\n";
-    }
-    // Check if topic is setted
-    if (!it->second.topic.empty()){
-        std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
-        send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
-    }
-    send(user.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
-    send(user.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
-}
-
-void Channels::multiChannelJoin(User& user, std::string channelName){
-    std::vector<std::string> splitChannel;
-    size_t pos = 0;
-    size_t next;
-    while ((next = channelName.find(',', pos)) != std::string::npos) {
-        std::string channel = channelName.substr(pos, next - pos);
-        channel.erase(std::remove(channel.begin(), channel.end(), '#'), channel.end());
-        splitChannel.push_back(channel);
-        pos = next + 1;
-    }
-    std::string lastChannel = channelName.substr(pos);
-    lastChannel.erase(std::remove(lastChannel.begin(), lastChannel.end(), '#'), lastChannel.end());
-    splitChannel.push_back(lastChannel);
-    for (std::vector<std::string>::iterator it = splitChannel.begin(); it != splitChannel.end(); ++it)
-        joinChannel(user, *it);
-}
-
 void Channels::leaveChannel(User& user, std::string channelName, std::string message)
 {
     // Check if the channel exists
@@ -164,6 +70,19 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
         // Update user channel list
         user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
     }
+}
+
+void Channels::createNewChannel(const User& user, const std::string& channelName, bool& setOp){
+    // Channel doesn't exist, create a new channel and add the user
+    Channel newChannel;                           
+    newChannel.clients.push_back(user);
+    newChannel.operators.push_back(user);
+    newChannel.topicMode = false;
+    newChannel.inviteOnly = false;
+    newChannel.userLimit = false;
+    newChannel.userMax = 0;
+    channels[channelName] = newChannel;
+    setOp = true;
 }
 
 void Channels::channelOperators(const User& user, const std::string& channelName, bool& setOp){

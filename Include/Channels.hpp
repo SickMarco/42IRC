@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <set>
+#include <sstream>
 #include "User.hpp"
 
 struct Channel {
@@ -37,13 +38,12 @@ private:
 	std::string hostname;
 	std::map<std::string, Channel > channels;
 
-	bool channelExist(User& user, const std::string& channelName);
+	bool channelExist(User& user, std::string channelName);
 	void createNewChannel(const User& user, const std::string& channelName, bool& setOp);
 	void channelOperators(const User& user, const std::string& channelName, bool& setOp);
 	int  checkChannelModes(const User& user, const std::string channelName);
 	bool checkOperator(const User& user, const std::string& channelName);
 	void joinMessageSequence(const User& user, const std::string& channelName);
-	void multiChannelJoin(User& user, std::string channelName);
 	void setTopic(const User& user, const std::string& channelName, const std::string& arg);
 
 public:
@@ -53,7 +53,7 @@ public:
 	void init(const std::string& serverName, const std::string& hostname);	
 	std::map<std::string, Channel>& getChannels();
 
-	int joinChannel(User& user, std::string buffer);
+	int joinChannel(User& user, std::string channelName, std::string key);
 	void leaveChannel(User& user, std::string channelName, std::string message);
 	int	messageToChannel(const User& user, std::string buffer);
 	void topic(const User& user, std::string buffer);
@@ -64,6 +64,8 @@ public:
 	void setModeKey(const User& user, std::string buffer, std::string mode);
 	bool channelExist2(std::string channelName);
 	void setModeUserLimit(const User& user, std::string buffer, const std::string& flag);
+	void multiChannelJoin(User& user, std::string buffer);
+	std::vector<std::string> split(std::string s, char delimiter);
 };
 
 #endif
