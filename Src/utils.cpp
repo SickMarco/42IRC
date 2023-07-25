@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 16:53:12 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:43:19 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,4 +29,28 @@ std::string removeCRLF(const char* buffer){
     std::string input = buffer;
 	std::string ret = input.substr(0, input.length() - 1);
     return ret;
+}
+
+int findClient(std::vector <User> chClients, User user)
+{
+    std::vector <User> ::iterator it = chClients.begin();
+    for (int i = 0; it != chClients.end(); it++)
+    {;
+        if (*it == user)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
+int findClientByName(std::vector <User> chClients, std::string name)
+{
+    std::vector <User> ::iterator it = chClients.begin();
+    for (int i = 0; it != chClients.end(); it++)
+    {
+        if (it->getNick() == name)
+            return i;
+        i++;
+    }
+    return -1;
 }

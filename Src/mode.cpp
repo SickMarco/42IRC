@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 18:07:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:43:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 		return ;
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
-		int ind = Server::findClientByName(it->second.clients, newOper);
+		int ind = findClientByName(it->second.clients, newOper);
 		if (ind == -1)
 			return ;
 		if (!flag.compare("+o"))
@@ -144,7 +144,7 @@ void Channels::setModeKey(const User& user, std::string buffer, std::string mode
 	std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
 	std::string err;
 
-	if (channelExist2(channelName) == false) 
+	if (channelExist(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
         send(user.getSocket(),  err.c_str(), err.length(), 0);
