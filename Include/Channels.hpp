@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 18:37:28 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 17:21:45 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,10 @@
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <sys/socket.h>
+#include <map>
+#include <cstring>
+#include <algorithm>
 #include "User.hpp"
 
 struct Channel {
@@ -51,7 +55,6 @@ public:
 	~Channels();
 
 	void init(const std::string& serverName, const std::string& hostname);	
-	std::map<std::string, Channel>& getChannels();
 
 	int joinChannel(User& user, std::string channelName, std::string key);
 	void leaveChannel(User& user, std::string channelName, std::string message);
@@ -65,6 +68,7 @@ public:
 	bool channelExist(std::string channelName);
 	void setModeUserLimit(const User& user, std::string buffer, const std::string& flag);
 	void multiChannelJoin(User& user, std::string buffer);
+	std::map<std::string, Channel>& getChannels();
 	std::vector<std::string> split(std::string s, char delimiter);
 };
 

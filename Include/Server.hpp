@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 15:51:16 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 17:22:29 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ private:
 	int changeNick(std::string buffer, User &user, int flag);
 	std::string findMode(std::string buffer);
 	void invite(std::string buffer, User &user);
-	bool channelExist2(std::string channelName);
 	void modeHandler(const User& user, std::string buffer);
 	void kick(std::string buffer, User &user);
 

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 20:28:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 17:38:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,26 +15,18 @@
 
 #include <iostream>
 #include <string>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-#include <algorithm>
-#include <map>
 #include <vector>
+#include <unistd.h>
 
 class User
 {
 private:
-	struct sockaddr_in clientAddr;
-	socklen_t clientAddrLen;
 	int clientSocket;
 	std::string nick;
 	std::string user;
 
-	std::string host;
 	std::string ServerIP;
 	std::vector <std::string> channelsJoined;
-	char buffer[1024];
 
 public:
 	User();
@@ -52,7 +44,6 @@ public:
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);
-	char (&getBuffer())[1024];
 };
 
 std::string removeCRLF(const char* buffer);

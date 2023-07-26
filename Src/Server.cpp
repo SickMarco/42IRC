@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 15:51:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 17:24:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,7 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
         send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
         
-        close(user.getSocket());
-        user.setSocket(-1);
-        user.setNick("");
-        user.setUser("");
-        user.setIP("");
+        user.reset();
         return false;
     }
     return true;
@@ -66,6 +62,7 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 	std::string command, param;
 	std::stringstream ss(newClientMessage);
 	char delim;
+	char buffer[1024];
 
     while (std::getline(ss, command, '\n')){
         ss >> command;
@@ -85,11 +82,12 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 		}
     }
 	while (userAlreadExist == true){
-		bytesRead = recv(user.getSocket(), user.getBuffer(), sizeof(user.getBuffer()) - 1, 0);
-        user.getBuffer()[bytesRead] = '\0';
-		printStringNoP(user.getBuffer(), strlen(user.getBuffer()));
-		if (!strncmp(user.getBuffer(), "NICK ", 5))
-			userAlreadExist = changeNick(removeCRLF(&user.getBuffer()[5]), user, 1);
+		bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
+        buffer[bytesRead] = '\0';
+		printStringNoP(buffer, strlen(buffer));
+		if (!strncmp(buffer, "NICK ", 5))
+			userAlreadExist = changeNick(removeCRLF(&buffer[5]), user, 1);
+		memset(buffer, 0, 1024);
 	}
 	return true;
 }
@@ -100,12 +98,13 @@ int Server::newClientConnected(User& user)
     ssize_t bytesRead;
     std::string newClientMessage, command, param;
 	user.setIP(IP);
+	char buffer[1024];
     while (1)
     {
-        bytesRead = recv(user.getSocket(), user.getBuffer(), sizeof(user.getBuffer()) - 1, 0);
-        user.getBuffer()[bytesRead] = '\0';
-        newClientMessage += user.getBuffer();
-        memset(user.getBuffer(), 0, 1024);
+        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
+        buffer[bytesRead] = '\0';
+        newClientMessage += buffer;
+        memset(buffer, 0, 1024);
         if (newClientMessage.find("\nPASS") != newClientMessage.npos &&
             newClientMessage.find("\nNICK") != newClientMessage.npos &&
             newClientMessage.find("\nUSER") != newClientMessage.npos)
