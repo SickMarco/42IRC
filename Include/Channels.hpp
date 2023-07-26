@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 17:21:45 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 19:10:14 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,5 +71,7 @@ public:
 	std::map<std::string, Channel>& getChannels();
 	std::vector<std::string> split(std::string s, char delimiter);
 };
+
+int findClientByName(std::vector <User> chClients, std::string name);
 
 #endif
