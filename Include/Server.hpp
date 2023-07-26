@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 18:43:41 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 15:51:16 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ private:
 	void newClientHandler(struct pollfd* fds, int& numClients);
 	int newClientConnected(User& user);
 	bool checkPassword(User& user, const std::string& PASS);
+	bool setNewUser(User& user, const std::string& newClientMessage);
 	void welcomeMsg(const User& user);
 	void messageHandler(User& user);
 	void commandHandler(User &user);

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 15:19:20 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 15:51:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,43 @@ bool Server::checkPassword(User& user, const std::string& PASS){
     return true;
 }
 
+bool Server::setNewUser(User& user, const std::string& newClientMessage){
+	bool userAlreadExist = false;
+	ssize_t bytesRead;
+	std::string command, param;
+	std::stringstream ss(newClientMessage);
+	char delim;
+
+    while (std::getline(ss, command, '\n')){
+        ss >> command;
+        if (command.find("PASS") != command.npos){
+			ss >> delim >> param;
+            if (checkPassword(user, param) == false)
+                return false;
+		}
+        else if (command.find("NICK") != command.npos){
+			ss >> param;
+			userAlreadExist = changeNick(param, user, 1);
+		}
+        else if (command.find("USER") != command.npos){
+			ss.ignore(1, ' ');
+			std::getline(ss, param, ' ');
+			user.setUser(param);
+		}
+    }
+	while (userAlreadExist == true){
+		bytesRead = recv(user.getSocket(), user.getBuffer(), sizeof(user.getBuffer()) - 1, 0);
+        user.getBuffer()[bytesRead] = '\0';
+		printStringNoP(user.getBuffer(), strlen(user.getBuffer()));
+		if (!strncmp(user.getBuffer(), "NICK ", 5))
+			userAlreadExist = changeNick(removeCRLF(&user.getBuffer()[5]), user, 1);
+	}
+	return true;
+}
+
 int Server::newClientConnected(User& user)
 {
+	
     ssize_t bytesRead;
     std::string newClientMessage, command, param;
 	user.setIP(IP);
@@ -77,26 +112,8 @@ int Server::newClientConnected(User& user)
                 break;
     }
 	printStringNoP(newClientMessage.c_str(), newClientMessage.length());
-
-    std::stringstream ss(newClientMessage);
-	char delim;
-    while (std::getline(ss, command, '\n')){
-        ss >> command;
-        if (command.find("PASS") != command.npos){
-			ss >> delim >> param;
-            if (checkPassword(user, param) == false)
-                return 1;
-		}
-        else if (command.find("NICK") != command.npos){
-			ss >> param;
-            changeNick(param, user, 1);
-		}
-        else if (command.find("USER") != command.npos){
-			ss.ignore(1, ' ');
-			std::getline(ss, param, ' ');
-			user.setUser(param);
-		}
-    }
+	if (setNewUser(user, newClientMessage) == false)
+		return 1;
     welcomeMsg(user);
     return 0;
 }
