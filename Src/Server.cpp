@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 17:31:45 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 15:19:20 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ bool Server::checkPassword(User& user, const std::string& PASS){
 int Server::newClientConnected(User& user)
 {
     ssize_t bytesRead;
-    std::string newClientMessage;
+    std::string newClientMessage, command, param;
 	user.setIP(IP);
     while (1)
     {
@@ -77,20 +77,26 @@ int Server::newClientConnected(User& user)
                 break;
     }
 	printStringNoP(newClientMessage.c_str(), newClientMessage.length());
-    size_t idx = newClientMessage.find(":");
-    std::string PASS = newClientMessage.substr(idx + 1, newClientMessage.find('\n', idx) - idx - 1);
-    if (checkPassword(user, PASS) == false)
-        return 1;
-    idx = newClientMessage.find("NICK");
-    if (idx == newClientMessage.npos)
-        return 1;
-    std::string NICK = newClientMessage.substr(idx + 5, newClientMessage.find_first_of('\n', idx + 5) - (idx + 5));
-    changeNick(NICK, user, 1);
-    idx = newClientMessage.find("USER");
-    if (idx == newClientMessage.npos)
-        return 1;
-    std::string USER = newClientMessage.substr(idx + 5, newClientMessage.find_first_of(' ', idx + 5) - (idx + 5));
-    user.setUser(USER);
+
+    std::stringstream ss(newClientMessage);
+	char delim;
+    while (std::getline(ss, command, '\n')){
+        ss >> command;
+        if (command.find("PASS") != command.npos){
+			ss >> delim >> param;
+            if (checkPassword(user, param) == false)
+                return 1;
+		}
+        else if (command.find("NICK") != command.npos){
+			ss >> param;
+            changeNick(param, user, 1);
+		}
+        else if (command.find("USER") != command.npos){
+			ss.ignore(1, ' ');
+			std::getline(ss, param, ' ');
+			user.setUser(param);
+		}
+    }
     welcomeMsg(user);
     return 0;
 }
@@ -134,7 +140,7 @@ void Server::run() {
     fds[0].fd = skt.getSocket();
     fds[0].events = POLLIN;
     int numClients = 0; // Numero attuale di client connessi
-    while (1) 
+    while (isServerRunning) 
     {
         int ret = poll(fds, numClients + 1, 1000);
         if (ret < 0) {
@@ -147,8 +153,6 @@ void Server::run() {
         for (int i = 0; i < numClients; ++i)
             if (fds[i + 1].revents & POLLIN)
                 messageHandler(clients[i]);
-        if (!isServerRunning)
-            break;
     }
     for (int i = 0; i < numClients; ++i)
         if (clients[i].getSocket() > 0)
