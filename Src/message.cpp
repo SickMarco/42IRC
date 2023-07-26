@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 18:43:11 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 15:58:19 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void Server::messageHandler(User& user)
 			user.setSocket(-1);
 			return ;
 		}
-		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));        
+		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));     
         msgBuffer += std::string(buffer);
         if (!std::strchr(buffer, '\n'))
             return ;
@@ -113,6 +113,8 @@ void Server::quit(char * buffer, User &user)
 
 int Server::changeNick(std::string buffer, User &user, int flag)
 {
+	if (buffer.find('\n') != buffer.npos)
+		buffer = removeCRLF(&buffer[0]);
     std::vector <User> ::iterator it = clients.begin();
     for (; it != clients.end(); it++)
     {
