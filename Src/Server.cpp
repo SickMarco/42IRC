@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 17:24:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 17:41:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,11 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
         send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
         
-        user.reset();
+        close(user.getSocket());
+        user.setSocket(-1);
+        user.setNick("");
+        user.setUser("");
+        user.setIP("");
         return false;
     }
     return true;
