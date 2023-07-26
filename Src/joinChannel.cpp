@@ -88,6 +88,20 @@ void Channels::joinMessageSequence(const User& user, const std::string& channelN
         std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
         send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
     }
+    //Check if channels mode enabled
+    if (it->second.topicMode == true || it->second.inviteOnly == true || it->second.userLimit == true || !it->second.passKey.empty()){
+        std::string RPL_CHANNELMODEIS = serverName + " 324 " + user.getNick() + " #" + channelName + " +";
+        if (it->second.topicMode == true)
+            RPL_CHANNELMODEIS += 't';
+        if (it->second.inviteOnly == true)
+            RPL_CHANNELMODEIS += 'i';
+        if (it->second.userLimit == true)
+            RPL_CHANNELMODEIS += 'l';
+        if (!it->second.passKey.empty())
+             RPL_CHANNELMODEIS += "k :" + it->second.passKey;
+        RPL_CHANNELMODEIS += "\r\n";
+        send(user.getSocket(), RPL_CHANNELMODEIS.c_str(), RPL_CHANNELMODEIS.length(), 0);
+    }
     send(user.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
     send(user.getSocket(), RPL_ENDOFNAMES.c_str(), RPL_ENDOFNAMES.length(), 0);
 }
