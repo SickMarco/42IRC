@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 19:10:14 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/26 19:46:18 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <map>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
 #include "User.hpp"
 
 struct Channel {

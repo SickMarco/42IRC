@@ -91,15 +91,25 @@ void Channels::joinMessageSequence(const User& user, const std::string& channelN
     //Check if channels mode enabled
     if (it->second.topicMode == true || it->second.inviteOnly == true || it->second.userLimit == true || !it->second.passKey.empty()){
         std::string RPL_CHANNELMODEIS = serverName + " 324 " + user.getNick() + " #" + channelName + " +";
+        std::string param = " ";
         if (it->second.topicMode == true)
             RPL_CHANNELMODEIS += 't';
         if (it->second.inviteOnly == true)
             RPL_CHANNELMODEIS += 'i';
-        if (it->second.userLimit == true)
+        if (it->second.userLimit == true){
+            std::stringstream ss;
+            ss << it->second.userMax;
+            std::string num = ss.str();
+            param += num;
             RPL_CHANNELMODEIS += 'l';
-        if (!it->second.passKey.empty())
-             RPL_CHANNELMODEIS += "k :" + it->second.passKey;
-        RPL_CHANNELMODEIS += "\r\n";
+        }
+        if (!it->second.passKey.empty()){
+            if (RPL_CHANNELMODEIS.find("i") != RPL_CHANNELMODEIS.npos)
+                param += " ";
+            RPL_CHANNELMODEIS += "k";
+            param += it->second.passKey;
+        }
+        RPL_CHANNELMODEIS += param + "\r\n";
         send(user.getSocket(), RPL_CHANNELMODEIS.c_str(), RPL_CHANNELMODEIS.length(), 0);
     }
     send(user.getSocket(), RPL_NAMREPLY.c_str(), RPL_NAMREPLY.length(), 0);
