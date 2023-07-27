@@ -32,16 +32,19 @@ void Channels::sendToAll(const std::string& channelName, const std::string& mess
     }
 }
 
-int Channels::messageToChannel(const User& user, std::string buffer) {
+int Channels::messageToChannel(const User& user, std::string buffer)
+{
     std::string channelName = buffer.substr(1, buffer.find(' '));
     channelName = channelName.substr(0, channelName.length() - 1);
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
-
     // Find the channel
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    if (it != channels.end()) {
+    if (it != channels.end())
+    {
+        if ((channels[channelName]).censorship == true)
+            censorshipBot(mex);
         std::vector<User> channelClients = it->second.clients;
-        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex.substr(0, mex.length()) + "\r\n";
+        std::string privmsg = ":" + user.getNick() + " PRIVMSG #" + channelName + " " + mex + "\r\n";
 
         for (size_t i = 0; i < channelClients.size(); ++i) {
             if (channelClients[i].getSocket() != -1 && channelClients[i].getSocket() != user.getSocket())
@@ -111,6 +114,7 @@ void Channels::createNewChannel(const User& user, const std::string& channelName
     newChannel.inviteOnly = false;
     newChannel.userLimit = false;
     newChannel.userMax = 0;
+    newChannel.censorship = true;
     channels[channelName] = newChannel;
     setOp = true;
 }
@@ -182,4 +186,33 @@ bool Channels::channelExist(std::string channelName)
         return false;
     else
         return true;
+}
+
+void Channels::censorshipBot(std::string &mex)
+{
+    std::ifstream inputFile("bannedWords.txt");
+    
+    if (!inputFile)
+        return ;
+        
+
+    std::string word;
+    std::vector <std::string> bannedWords;
+    while (inputFile >> word)
+        bannedWords.push_back(word);
+
+    std::vector <std::string> ::iterator vit = bannedWords.begin();
+    for (size_t i = 0; vit != bannedWords.end(); vit++, i++)
+    {
+        std::size_t found = mex.find(bannedWords[i]);
+        if (found != std::string::npos)
+        {
+            for (size_t j = 0; j < bannedWords[i].size(); j++)
+            {
+                mex[found] = '*';
+                found++;
+            }
+        }
+    }
+    std::cout << "Censored message " << mex << std::endl;
 }

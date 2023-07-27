@@ -21,6 +21,7 @@
 #include <cstring>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
 #include "User.hpp"
 
 struct Channel {
@@ -34,6 +35,7 @@ struct Channel {
 	std::set <std::string> banlist;
 	std::set <std::string> invitelist;
 	std::string passKey;
+	bool censorship;
 };
 
 class Channels
@@ -71,6 +73,7 @@ public:
 	void multiChannelJoin(User& user, std::string buffer);
 	std::map<std::string, Channel>& getChannels();
 	std::vector<std::string> split(std::string s, char delimiter);
+	void censorshipBot(std::string & mex);
 };
 
 int findClientByName(std::vector <User> chClients, std::string name);
