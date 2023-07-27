@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 19:46:18 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 18:36:28 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ public:
 	void multiChannelJoin(User& user, std::string buffer);
 	std::map<std::string, Channel>& getChannels();
 	std::vector<std::string> split(std::string s, char delimiter);
+	void botCommand(const User& user, const std::string& channelName, std::string buffer);
 };
 
 int findClientByName(std::vector <User> chClients, std::string name);
