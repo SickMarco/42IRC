@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 15:48:55 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 17:47:27 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ User&  User::operator=(const User& src){
 		this->clientAddrLen = src.clientAddrLen;
 		this->clientSocket = src.clientSocket;
 		this->nick = src.nick;
-		this->user = src.user;
 		this->ServerIP = src.ServerIP;
 	}
 	return *this;

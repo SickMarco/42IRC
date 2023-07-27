@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 19:46:15 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 18:39:08 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,11 @@ int Channels::messageToChannel(const User& user, std::string buffer)
     channelName = channelName.substr(0, channelName.length() - 1);
     std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
     // Find the channel
+	if (buffer.find("!bot ") != buffer.npos){
+		botCommand(user, channelName, buffer);
+		return 1;
+	}
+
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
     if (it != channels.end())
     {
@@ -124,6 +129,11 @@ void Channels::channelOperators(const User& user, const std::string& channelName
         //Set first user as operator
         std::string setOperator = serverName + " MODE #" + channelName + " +o " + user.getNick() + "\r\n";
         send(user.getSocket(), setOperator.c_str(), setOperator.length(), 0);
+		User bot;
+		bot.setNick("Mimmomodem");
+		channels[channelName].clients.push_back(bot);
+        std::string BOT = ":Mimmomodem!Mimmomodem@bot JOIN #" + channelName + "\r\n";
+        send(user.getSocket(), BOT.c_str(), BOT.length(), 0);
     }
     else {
         //Notify all user of channels operators

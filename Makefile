@@ -10,7 +10,7 @@ CC = c++
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
-SRC = main.cpp Server.cpp Socket.cpp User.cpp Channels.cpp message.cpp utils.cpp mode.cpp joinChannel.cpp
+SRC = main.cpp Server.cpp Socket.cpp User.cpp Channels.cpp message.cpp utils.cpp mode.cpp joinChannel.cpp bot.cpp
 
 OBJP = $(addprefix $(OBJ_DIR), $(notdir $(SRC:.cpp=.o)))
 
