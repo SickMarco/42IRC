@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 17:22:29 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 15:57:10 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,9 @@ private:
 	std::string msgBuffer;
 	std::vector<User> clients;
 	Channels channels;
+	int clientsConnected;
 
+	//CLIENTS
 	void newClientHandler(struct pollfd* fds, int& numClients);
 	int newClientConnected(User& user);
 	bool checkPassword(User& user, const std::string& PASS);
@@ -59,6 +61,8 @@ private:
 	void welcomeMsg(const User& user);
 	void messageHandler(User& user);
 	void commandHandler(User &user);
+
+	//CMDS
 	int messageToPrivate(User& user, std::string buffer);
 	void quit(char * buffer, User &user);
 	int changeNick(std::string buffer, User &user, int flag);

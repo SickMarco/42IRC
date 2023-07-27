@@ -6,15 +6,19 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 17:38:50 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 15:48:55 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
 
-User::User() : clientSocket(-1) {}
+User::User() : clientAddrLen(sizeof(clientAddr)), clientSocket(-1) {}
 
 User::~User(){}
+
+sockaddr_in& User::getAddr() { return this->clientAddr;}
+
+socklen_t& User::getAddrLen() { return this->clientAddrLen; }
 
 int User::getSocket() const { return this->clientSocket; }
 
@@ -36,6 +40,8 @@ bool User::operator==(const User& other) const {return (this->clientSocket == ot
 
 User&  User::operator=(const User& src){
 	if (this != &src){
+		this->clientAddr = src.clientAddr;
+		this->clientAddrLen = src.clientAddrLen;
 		this->clientSocket = src.clientSocket;
 		this->nick = src.nick;
 		this->user = src.user;

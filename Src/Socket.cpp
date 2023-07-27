@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 11:44:36 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/24 20:09:48 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 15:43:13 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,5 +63,5 @@ void Socket::getMyIP(std::string& hostnm, std::string& IP){
 		std::cout << '.' << std::flush;
 		usleep(333000);
 	}
-	std::cout <<  "\r                         \rIP address detected"  << std::endl;
+	std::cout << "\033[0;32m" <<  "\r                         \rIP address detected"  << "\033[0;37m" <<std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 15:58:19 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 15:54:56 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,11 +104,12 @@ void Server::quit(char * buffer, User &user)
 
     close(user.getSocket());
     user.setSocket(-1);
-	if (!strncmp(&buffer[6], "ragequit", 8))
+	if (!strncmp(&buffer[6], "ragequit", 8)) // Server shutdown, only for valgrind test
 		isServerRunning = false;
     user.setNick("");
     user.setUser("");
     user.setIP("");
+    clientsConnected--;
 }
 
 int Server::changeNick(std::string buffer, User &user, int flag)

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/26 17:41:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/27 15:53:28 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), se
 	skt.socketInit(IP);
 	skt.binding();
     channels.init(serverName, hostname);
-    std::cout << "SERVER IP: \033[0;35m" << IP << "\033[0;37m" << std::endl;
+	clientsConnected = 0;
+    std::cout << "Server IP: \033[0;35m" << IP << "\033[0;37m" << std::endl;
 }
 
 Server::~Server(){
@@ -121,60 +122,50 @@ int Server::newClientConnected(User& user)
     return 0;
 }
 
-void Server::newClientHandler(struct pollfd* fds, int& numClients) {
-    if (fds[0].revents & POLLIN)
-    {
-        int clientSocket = accept(skt.getSocket(), NULL, NULL);
+void Server::newClientHandler(struct pollfd* fds, int& clientsConnected) {
+    if (clientsConnected == MAX_CLIENTS)
+            return;
+	else if (fds[0].revents & POLLIN) {
+        int i;
+        for (i = 0; i < MAX_CLIENTS; ++i)
+            if (clients[i].getSocket() == -1)
+                break;
+        int clientSocket = accept(skt.getSocket(), (struct sockaddr*)&clients[i].getAddr(), &clients[i].getAddrLen());
         if (clientSocket < 0){
             perror("Accept error");
             return;
         }
         // Aggiungi il nuovo client all'array
-        if (numClients < MAX_CLIENTS) {
-            int i;
-            for (i = 0; i < MAX_CLIENTS; ++i) {
-                if (clients[i].getSocket() == -1) {
-                    clients[i].setSocket(clientSocket);
-                    fds[i + 1].fd = clientSocket;
-                    fds[i + 1].events = POLLIN;
-                    break;
-                }
-            }
-            if (i != MAX_CLIENTS)
-            {
-                if (newClientConnected(clients[i]) != 1)
-                    numClients++;
-            }
-            else
-                close(clientSocket);
-        } 
-        else
-            close(clientSocket);
+        clients[i].setSocket(clientSocket);
+        fds[i + 1].fd = clientSocket;
+        fds[i + 1].events = POLLIN;
+        if (newClientConnected(clients[i]) != 1)
+            clientsConnected++;
     }
 }
 
+
 void Server::run() {
-    // Aggiungi il socket del server all'array di pollfd
+    // Add server socket to pollfds
     struct pollfd fds[MAX_CLIENTS + 1];
     memset(fds, 0, sizeof(fds));
     fds[0].fd = skt.getSocket();
     fds[0].events = POLLIN;
-    int numClients = 0; // Numero attuale di client connessi
-    while (isServerRunning) 
-    {
-        int ret = poll(fds, numClients + 1, 1000);
+    while (isServerRunning) {
+        int ret = poll(fds, clientsConnected + 1, 1000);
         if (ret < 0) {
             perror("Poll error");
             break;
         }
         else if (ret == 0)
             continue;
-        newClientHandler(fds, numClients);
-        for (int i = 0; i < numClients; ++i)
+        newClientHandler(fds, clientsConnected);
+        for (int i = 0; i < clientsConnected; ++i)
             if (fds[i + 1].revents & POLLIN)
                 messageHandler(clients[i]);
     }
-    for (int i = 0; i < numClients; ++i)
+	// Close all clients connection
+    for (int i = 0; i < clientsConnected; ++i)
         if (clients[i].getSocket() > 0)
             close(clients[i].getSocket());
 }
