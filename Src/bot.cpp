@@ -40,11 +40,11 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 	else if (cmd.find("ff on") != cmd.npos && findClientByName(channels[channelName].operators, user.getNick()) != -1)
 	{
 		channels[channelName].censorship = true;
-		sendToAll(channelName, "Cnsorship is ON\r\n");
+		sendToAll(channelName, "Censorship ON\r\n");
 	}
 	else if (cmd.find("ff off") != cmd.npos && findClientByName(channels[channelName].operators, user.getNick()) != -1)
 	{
 		channels[channelName].censorship = false;
-		sendToAll(channelName, "Cnsorship is OFF\r\n");
+		sendToAll(channelName, "Censorship OFF\r\n");
 	}
 }
