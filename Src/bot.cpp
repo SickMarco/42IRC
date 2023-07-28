@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 18:22:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 16:00:31 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 17:25:47 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,22 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 		std::string botHelp = ":Mimmomodem PRIVMSG #" + channelName + " :List of bot commands:\r\nmarasco\r\nlello\r\nrickroll\r\nbobbe\r\ncoin\r\n";
 		send(user.getSocket(), botHelp.c_str(), botHelp.length(), 0);
 	}
-	else if (cmd.find("marasco") != cmd.npos)
-		std::system("xdg-open https://youtu.be/_tGtYitmLLM?t=108");
-	else if (cmd.find("lello") != cmd.npos)
-		std::system("xdg-open https://youtu.be/B8aUQyMQICo?t=320");
-	else if (cmd.find("rickroll") != cmd.npos)
-		std::system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-	else if (cmd.find("bobbe") != cmd.npos)
-		std::system("xdg-open https://www.youtube.com/watch?v=aRTA4rJjeig");
+	else if (cmd.find("marasco") != cmd.npos) {
+		std::string marasco = ":Mimmomodem PRIVMSG #" + channelName + " :https://youtu.be/_tGtYitmLLM?t=108\r\n";
+		sendToAll(channelName, marasco);
+	}
+	else if (cmd.find("lello") != cmd.npos) {
+		std::string lello = ":Mimmomodem PRIVMSG #" + channelName + " :https://youtu.be/B8aUQyMQICo?t=320\r\n";
+		sendToAll(channelName, lello);
+	}
+	else if (cmd.find("rickroll") != cmd.npos){
+		std::string rickroll = ":Mimmomodem PRIVMSG #" + channelName + " :https://www.youtube.com/watch?v=dQw4w9WgXcQ\r\n";
+		sendToAll(channelName, rickroll);
+	}
+	else if (cmd.find("bobbe") != cmd.npos){
+		std::string bobbe = ":Mimmomodem PRIVMSG #" + channelName + " :https://www.youtube.com/watch?v=aRTA4rJjeig\r\n";
+		sendToAll(channelName, bobbe);
+	}
 	else if (cmd.find("coin") != cmd.npos) {
 		std::string coin = ":Mimmomodem PRIVMSG #" + channelName + " :";
 		std::srand(std::time(NULL));
