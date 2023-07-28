@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 17:10:50 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 18:26:46 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,10 @@ void Server::commandHandler(User &user)
     {
         std::string buf = removeCRLF(&(msgBuffer[5]));
         std::string token = std::strtok(&(buf[0]), " ");
-        channels.leaveChannel(user, &(token[1]), buf.substr(buf.find(':')));
+        if (buf.find(':') == buf.npos)
+            channels.leaveChannel(user, &(token[1]), buf + " :Konversation terminated!\n");
+        else
+            channels.leaveChannel(user, &(token[1]), buf.substr(buf.find(':')));
     }
     else if (!strncmp(msgBuffer.c_str(), "PING", 4))
     {
