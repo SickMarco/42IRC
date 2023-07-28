@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 18:39:08 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 16:02:02 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,6 +144,8 @@ void Channels::channelOperators(const User& user, const std::string& channelName
             send(user.getSocket(), sendOperator.c_str(), sendOperator.length(), 0);
         }
     }
+    std::string botAnnounce = ":Mimmomodem PRIVMSG #" + channelName + " :Hi " + user.getNick() + " welcome to the channel #" + channelName + " [!bot help for command list]\r\n";
+    send(user.getSocket(), botAnnounce.c_str(), botAnnounce.length(), 0);
 }
 
 bool Channels::checkOperator(const User& user, const std::string& channelName){

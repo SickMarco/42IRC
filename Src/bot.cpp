@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 18:22:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 19:14:46 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 16:00:31 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 	else if (cmd.find("marasco") != cmd.npos)
 		std::system("xdg-open https://youtu.be/_tGtYitmLLM?t=108");
 	else if (cmd.find("lello") != cmd.npos)
-		std::system("https://youtu.be/B8aUQyMQICo?t=318");
+		std::system("xdg-open https://youtu.be/B8aUQyMQICo?t=320");
 	else if (cmd.find("rickroll") != cmd.npos)
 		std::system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 	else if (cmd.find("bobbe") != cmd.npos)
@@ -35,7 +35,7 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 			coin += "HEADS\r\n";
 		else 
 			coin += "TAILS\r\n";
-		send(user.getSocket(), coin.c_str(), coin.length(), 0);
+		sendToAll(channelName, coin);
 	}
 	else if (cmd.find("ff on") != cmd.npos && findClientByName(channels[channelName].operators, user.getNick()) != -1)
 	{
@@ -46,5 +46,9 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 	{
 		channels[channelName].censorship = false;
 		sendToAll(channelName, "Censorship OFF\r\n");
+	}
+	else {
+		std::string notFound = ":Mimmomodem PRIVMSG #" + channelName + " :Command not found. [!bot help for command list]\r\n";
+		send(user.getSocket(), notFound.c_str(), notFound.length(), 0);
 	}
 }
