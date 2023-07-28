@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 15:53:28 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 16:29:20 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,9 @@ int Server::newClientConnected(User& user)
         buffer[bytesRead] = '\0';
         newClientMessage += buffer;
         memset(buffer, 0, 1024);
-        if (newClientMessage.find("\nPASS") != newClientMessage.npos &&
-            newClientMessage.find("\nNICK") != newClientMessage.npos &&
-            newClientMessage.find("\nUSER") != newClientMessage.npos)
+        if (newClientMessage.find("PASS") != newClientMessage.npos &&
+            newClientMessage.find("NICK") != newClientMessage.npos &&
+            newClientMessage.find("USER") != newClientMessage.npos)
                 break;
     }
 	printStringNoP(newClientMessage.c_str(), newClientMessage.length());
@@ -152,6 +152,7 @@ void Server::run() {
     fds[0].fd = skt.getSocket();
     fds[0].events = POLLIN;
     while (isServerRunning) {
+        
         int ret = poll(fds, clientsConnected + 1, 1000);
         if (ret < 0) {
             perror("Poll error");
