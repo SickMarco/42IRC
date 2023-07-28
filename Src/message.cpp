@@ -65,8 +65,8 @@ void Server::commandHandler(User &user)
         changeNick(&(msgBuffer[5]), user, 0);
     else if (!strncmp(msgBuffer.c_str(), "INVITE ", 7))
         invite(msgBuffer.substr(7, msgBuffer.length() - 1), user);
-    else if (!strncmp(msgBuffer.c_str(), "KICK ", 5))
-        kick(msgBuffer.substr(5, msgBuffer.length() - 1), user);
+    else if (!strncmp(msgBuffer.c_str(), "KICK #", 6))
+        kick(msgBuffer.substr(6, msgBuffer.length() - 1), user);
     else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
         channels.topic(user, removeCRLF(&msgBuffer[0]));
     else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
@@ -217,11 +217,13 @@ void Server::invite(std::string buffer, User &user)
 
 void Server::kick(std::string buffer, User &user)
 {
-    std::string channelName = buffer.substr(1, buffer.find(' ') - 1);
-    buffer = buffer.substr(channelName.length() + 2, std::string::npos);
-    std::string name = buffer.substr( 0, buffer.find(' '));
-    buffer = buffer.substr(name.length() + 2, std::string::npos);
-    std::string mex = buffer.substr(0, buffer.length() - 1);
+    std::stringstream ss(buffer);
+    std::string channelName;
+    ss >> channelName;
+    std::string name;
+    ss >> name;
+    std::string mex;
+    ss >> mex;
     
     std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";
@@ -248,7 +250,8 @@ void Server::kick(std::string buffer, User &user)
     {
         err = ERR_CHANOPRIVSNEEDED;
         send(user.getSocket(),  err.c_str(), err.length(), 0);
-        return ;
+        return ;// = buffer.substr(0, buffer.length() - 1);
+
     }
     if (findClientByName(chClients, name) == -1)
     {
