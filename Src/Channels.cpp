@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 17:40:42 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 17:52:36 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,15 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
         channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
         // Update user channel list
         user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
+        if (it->second.clients.size() == 2 && findClientByName(it->second.clients, "Mimmomodem") != -1){
+            std::vector<User>::iterator itUser = it->second.clients.begin();
+            for (; itUser != it->second.clients.end(); ++itUser){
+                if (itUser->getNick().compare("Mimmomodem") != 0) {
+                    std::string newOp = serverName + " MODE #" + channelName + " +o " + itUser->getNick() + "\r\n";
+                    sendToAll(channelName, newOp);
+                }
+            }
+        }
     }
 }
 
