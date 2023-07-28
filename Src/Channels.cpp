@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 16:02:02 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 17:40:42 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ int  Channels::checkChannelModes(const User& user, const std::string channelName
             return 1;
         }
     //    if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
-        if (it->second.userLimit == true && it->second.userMax == it->second.clients.size() && findClientByName(it->second.clients, user.getNick()) == -1){
+        if (it->second.userLimit == true && it->second.userMax <= it->second.clients.size() && findClientByName(it->second.clients, user.getNick()) == -1){
             std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
             send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
             return 1;
