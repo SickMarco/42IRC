@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 16:32:47 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 17:10:50 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void Server::messageHandler(User& user)
 			close(user.getSocket());
 			return ;
 		} else if (bytesRead == 0) {
+            std::memset(buffer, 0, sizeof(buffer));
+            msgBuffer.clear();
             std::string exit = ":Konversation terminated!\r\n";
             quit(&exit[0], user);
 			return ;

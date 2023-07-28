@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 16:29:20 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/28 16:41:43 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,12 +78,12 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 		}
         else if (command.find("NICK") != command.npos){
 			ss >> param;
-			userAlreadExist = changeNick(param, user, 1);
+			userAlreadExist = changeNick(removeCRLF(param.c_str()), user, 1);
 		}
         else if (command.find("USER") != command.npos){
 			ss.ignore(1, ' ');
 			std::getline(ss, param, ' ');
-			user.setUser(param);
+			user.setUser(removeCRLF(param.c_str()));
 		}
     }
 	while (userAlreadExist == true){
