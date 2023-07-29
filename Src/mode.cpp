@@ -14,9 +14,11 @@
 #include "Channels.hpp"
 
 std::string Server::findMode(std::string buffer){
-	size_t index = buffer.find_first_of("+-");
-    if (index != std::string::npos) {
-        std::string mode = buffer.substr(index, 2);
+	size_t startPos = buffer.find_first_of("+-");
+	std::string mode;
+    if (startPos != std::string::npos) {
+		std::stringstream ss(&(buffer[startPos]));
+		ss >> mode;
         return mode;
     }
     return "";
@@ -40,12 +42,12 @@ void Server::modeHandler(const User& user, std::string buffer){
 
 std::string extractNick(const std::string& buffer) {
     size_t startPos = buffer.find_first_of("+-");
+	std::string username;
     if (startPos != std::string::npos) {
-        size_t endPos = buffer.find('\n', startPos);
-        if (endPos != std::string::npos) {
-            std::string username = buffer.substr(startPos + 3, endPos - startPos - 3);
-            return username;
-        }
+		std::stringstream ss(&(buffer[startPos]));
+		ss >> username;
+		ss >> username;
+        return removeCRLF(username.c_str());
     }
     return "";
 }

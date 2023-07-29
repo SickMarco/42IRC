@@ -38,48 +38,53 @@ void Server::messageHandler(User& user)
 
 void Server::commandHandler(User &user)
 {
-    if(!strncmp(user.msgBuffer.c_str(), "JOIN ", 5))
-			channels.multiChannelJoin(user, removeCRLF(&(user.msgBuffer[5])));
-    else if (!strncmp(user.msgBuffer.c_str(), "PRIVMSG #", 9))
-        channels.messageToChannel(user, removeCRLF(&(user.msgBuffer[8])));
-    else if (!strncmp(user.msgBuffer.c_str(), "PRIVMSG ", 8))
-        messageToPrivate(user, removeCRLF(&(user.msgBuffer[8])));
-    else if (!strncmp(user.msgBuffer.c_str(), "PART ", 5))
+    std::string const & str = user.msgBuffer;
+    if(str.length() >= 8 && !strncmp(str.c_str(), "JOIN ", 5))
+			channels.multiChannelJoin(user, removeCRLF(&(str[5])));
+    else if (str.length() >= 12 && !strncmp(str.c_str(), "PRIVMSG #", 9))
+        channels.messageToChannel(user, removeCRLF(&(str[8])));
+    else if (str.length() >= 11 && !strncmp(str.c_str(), "PRIVMSG ", 8))
+        messageToPrivate(user, removeCRLF(&(str[8])));
+    else if (str.length() >= 8 && !strncmp(str.c_str(), "PART ", 5))
     {
-        std::string buf = removeCRLF(&(user.msgBuffer[5]));
+        std::string buf = removeCRLF(&(str[5]));
         std::string token = std::strtok(&(buf[0]), " ");
         if (buf.find(':') == buf.npos)
             channels.leaveChannel(user, &(token[1]), buf + " :Konversation terminated!\n");
         else
             channels.leaveChannel(user, &(token[1]), buf.substr(buf.find(':')));
     }
-    else if (!strncmp(user.msgBuffer.c_str(), "PING", 4))
+    else if (str.length() >= 7 && !strncmp(str.c_str(), "PING", 4))
     {
         std::string PONG = "PONG " + std::string(std::strtok(&user.msgBuffer[5], "\n")) + "\r\n";
         send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
     }
-    else if (!strncmp(user.msgBuffer.c_str(), "QUIT ", 5))
+    else if (str.length() >= 7 && !strncmp(str.c_str(), "QUIT ", 5))
         quit(&(user.msgBuffer[0]), user);
-    else if (!strncmp(user.msgBuffer.c_str(), "NICK ", 5))
-        changeNick(&(user.msgBuffer[5]), user, 0);
-    else if (!strncmp(user.msgBuffer.c_str(), "INVITE ", 7))
-        invite(user.msgBuffer.substr(7, user.msgBuffer.length() - 1), user);
-    else if (!strncmp(user.msgBuffer.c_str(), "KICK #", 6))
-        kick(user.msgBuffer.substr(6, user.msgBuffer.length() - 1), user);
-    else if (!strncmp(user.msgBuffer.c_str(), "TOPIC ", 6))
-        channels.topic(user, removeCRLF(&user.msgBuffer[0]));
-    else if (!strncmp(user.msgBuffer.c_str(), "MODE ", 5))
-        modeHandler(user, user.msgBuffer);
-    else if (strncmp(user.msgBuffer.c_str(), "WHO ", 4) && strncmp(user.msgBuffer.c_str(), "USERHOST ", 9)){
-        std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&user.msgBuffer[0]) + " :Unknown command\r\n";
+    else if (str.length() >= 7 && !strncmp(str.c_str(), "NICK ", 5))
+        changeNick(&(str[5]), user, 0);
+    else if (str.length() >= 12 && !strncmp(str.c_str(), "INVITE ", 7))
+        invite(str.substr(7, str.length() - 1), user);
+    else if (str.length() >= 10 && !strncmp(str.c_str(), "KICK #", 6))
+        kick(str.substr(6, str.length() - 1), user);
+    else if (str.length() >= 7 && !strncmp(str.c_str(), "TOPIC ", 6))
+        channels.topic(user, removeCRLF(&str[0]));
+    else if (str.length() >= 9 && !strncmp(str.c_str(), "MODE ", 5))
+        modeHandler(user, str);
+    else if (strncmp(str.c_str(), "WHO ", 4) && strncmp(str.c_str(), "USERHOST ", 9)){
+        std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&str[0]) + " :Unknown command\r\n";
         send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), 0);
     }
 }
 
 int Server::messageToPrivate(User& user, std::string buffer)
 {
-    std::string name = buffer.substr(0, buffer.find(' '));
-    std::string mex = buffer.substr(name.length() + 1, std::string::npos);
+    std::stringstream ss(buffer);
+    std::string name;
+    ss >> name;
+    std::string mex;
+    std::getline(ss, mex, ' ');
+    std::getline(ss, mex, '\n');
 
     int clientSocket = -1;
     std::vector<User> ::iterator it = clients.begin();
@@ -91,7 +96,7 @@ int Server::messageToPrivate(User& user, std::string buffer)
             break;
         }
     }
-    std::string PRIVMSG = ":" + user.getNick() + "! PRIVMSG " + name + " " + mex.substr(0, mex.length()) + "\r\n";
+    std::string PRIVMSG = ":" + user.getNick() + "! PRIVMSG " + name + " " + mex + "\r\n";
 
     if (user.getNick() != name)
         send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
@@ -169,8 +174,14 @@ int Server::changeNick(std::string buffer, User &user, int flag)
 
 void Server::invite(std::string buffer, User &user)
 {
-    std::string name = buffer.substr(0, buffer.find(' '));
-    std::string channelName = buffer.substr(name.length() + 2, buffer.length() - name.length() - 3);
+    buffer = removeCRLF(buffer.c_str());
+    std::stringstream ss(buffer);
+    std::string name;
+    ss >> name;
+    std::string channelName;
+    std::getline(ss, channelName, '#');
+    ss >> channelName;
+
     std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";//No such channel
     std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";//You're not on that channel
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";//You're not channel operator
@@ -225,7 +236,7 @@ void Server::kick(std::string buffer, User &user)
     std::getline(ss, mex, ' ');
     std::getline(ss, mex, '\n');
 
-    std::cout << "'" << channelName << "' '" << name << "' '" << mex << "'" << std::endl;
+//    std::cout << "'" << channelName << "' '" << name << "' '" << mex << "'" << std::endl;
     
     std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";
@@ -241,8 +252,8 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     std::vector <User> & chClients = ((channels.getChannels())[channelName]).clients;
-    std::cout << "Channel clients:" << std::endl;
-    printUsers(chClients);
+//    std::cout << "Channel clients:" << std::endl;
+//   printUsers(chClients);
     if (findClient(chClients, user) == -1)
     {
         err = ERR_NOTONCHANNEL;
@@ -250,8 +261,8 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     std::vector <User> & chOper = ((channels.getChannels())[channelName]).operators;
-    std::cout << "Channel Ops:" << std::endl;
-    printUsers(chOper);
+//    std::cout << "Channel Ops:" << std::endl;
+//    printUsers(chOper);
     if (findClient(chOper, user) == -1)
     {
         err = ERR_CHANOPRIVSNEEDED;
