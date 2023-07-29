@@ -133,12 +133,12 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         }
     }
     
-    std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";
+    //std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";
     std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + buffer + "\r\n";
     
     if (flag == 0)
     {
-        std::cout << nickmsg;
+    //    std::cout << nickmsg;
         //search in channels and change nick
         std::vector<std::string>::iterator it2 = user.getChannels().begin();
         for (; it2 != user.getChannels().end(); it2++)
@@ -161,7 +161,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         it = clients.begin();
         for (; it != clients.end(); it++)
         {
-            send(it->getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
+        //    send(it->getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
             send(it->getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);
         }
     }
@@ -223,14 +223,17 @@ void Server::kick(std::string buffer, User &user)
     std::string name;
     ss >> name;
     std::string mex;
-    ss >> mex;
+    std::getline(ss, mex, ' ');
+    std::getline(ss, mex, '\n');
+
+    std::cout << "'" << channelName << "' '" << name << "' '" << mex << "'" << std::endl;
     
     std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_USERNOTINCHANNEL = "ERR_USERNOTINCHANNEL :" + user.getNick() +  " " + name + " #" + channelName + " :They aren't on that channel\r\n";
     std::string err;
-    std::string KICK = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " KICK #" + channelName + " " + name + " :" + mex + "\r\n"; 
+    std::string KICK = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " KICK #" + channelName + " " + name + " " + mex + "\r\n"; 
 
     if (channels.channelExist(channelName) == false) 
     {
@@ -260,8 +263,12 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     channels.sendToAll(channelName, KICK);
-    
-    // Channel exists, remove the user from the channel participants
+
+    //remove op
+    std::vector<User> & channelops = ((channels.getChannels())[channelName]).operators;
+    if (findClientByName(channelops, user.getNick()) != -1)
+        channelops.erase(std::remove(channelops.begin(), channelops.end(), user), channelops.end());
+    // remove the user from the channel participants
     std::vector<User> & channelusers = ((channels.getChannels())[channelName]).clients;
     User & target = channelusers[findClientByName(channelusers, name)];
     channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), target), channelusers.end());

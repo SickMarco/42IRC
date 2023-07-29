@@ -34,16 +34,30 @@ void Channels::sendToAll(const std::string& channelName, const std::string& mess
 
 int Channels::messageToChannel(const User& user, std::string buffer)
 {
-    std::string channelName = buffer.substr(1, buffer.find(' '));
-    channelName = channelName.substr(0, channelName.length() - 1);
-    std::string mex = buffer.substr(channelName.length() + 1, std::string::npos);
-    // Find the channel
-	if (buffer.find("!bot ") != buffer.npos){
+    std::stringstream ss(&(buffer[1]));
+    std::string channelName;
+    ss >> channelName;
+    std::string mex;
+    std::getline(ss, mex, ' ');
+    std::getline(ss, mex, '\n');
+    std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+    
+    std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    if (it == channels.end())
+        return 0;
+    
+    if (findClientByName(channels[channelName].clients, user.getNick()) == -1)
+    {
+        send(user.getSocket(),  ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), 0);
+        return 0;
+    }
+
+    if (buffer.find("!bot ") != buffer.npos){
 		botCommand(user, channelName, buffer);
 		return 1;
 	}
 
-    std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    
     if (it != channels.end())
     {
         if ((channels[channelName]).censorship == true)
@@ -98,21 +112,37 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
     if (it != channels.end())
     {
         std::string PART = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname +" PART :#" + channelName + "\r\n";
+        
         //Notify all channel users
         std::vector<User>::iterator itc = it->second.clients.begin();
         for (; itc != it->second.clients.end(); ++itc)
             send(itc->getSocket(), PART.c_str(), PART.length(), 0);
+        
         // Channel exists, remove the user from the channel participants
         std::vector<User> & channelusers = it->second.clients;
         channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
+        
+        //remove op
+        std::vector<User> & channelops = it->second.operators;
+        if (findClientByName(channelops, user.getNick()) != -1)
+            channelops.erase(std::remove(channelops.begin(), channelops.end(), user), channelops.end());
+        
         // Update user channel list
         user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
-        if (it->second.clients.size() == 2 && findClientByName(it->second.clients, "Mimmomodem") != -1){
-            std::vector<User>::iterator itUser = it->second.clients.begin();
-            for (; itUser != it->second.clients.end(); ++itUser){
-                if (itUser->getNick().compare("Mimmomodem") != 0) {
+        
+        //give op if there are no more op in the channel
+        if  (channelops.size() == 0 ||
+            (channelops.size() == 1 && findClientByName(channelops, "Mimmomodem") != -1))
+        {
+            std::vector<User>::iterator itUser = channelusers.begin();
+            for (; itUser != channelusers.end(); ++itUser)
+            {
+                if (itUser->getNick().compare("Mimmomodem") != 0)
+                {
+                    channelops.push_back(*itUser);
                     std::string newOp = serverName + " MODE #" + channelName + " +o " + itUser->getNick() + "\r\n";
                     sendToAll(channelName, newOp);
+                    break ;
                 }
             }
         }
