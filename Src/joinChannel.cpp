@@ -13,10 +13,11 @@ std::vector<std::string> Channels::split(std::string s, char delimiter)
 
 void Channels::multiChannelJoin(User& user, std::string buffer)
 {
-    std::string channelNames = buffer.substr(0, buffer.find(' '));
+    std::stringstream ss(buffer);
+    std::string channelNames;
+    ss >> channelNames;
     std::string keys;
-    if (buffer.find(' ') != buffer.npos)
-        keys = buffer.substr(channelNames.length() + 1, buffer.npos);
+    ss >> keys;
     std::vector <std::string> chNames = split(channelNames, ',');
     std::vector <std::string> chKeys = split(keys, ',');
     std::string key;
@@ -30,7 +31,8 @@ void Channels::multiChannelJoin(User& user, std::string buffer)
         else
             key = *it2;
         std::string name = *it;
-        joinChannel(user, &(name[1]), key);
+        if (name.length() >= 3)
+            joinChannel(user, &(name[1]), key);
         if (it2 != chKeys.end())
             it2++;
     }

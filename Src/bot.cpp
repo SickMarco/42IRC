@@ -14,7 +14,9 @@
 #include <ctime>
 
 void Channels::botCommand(const User& user, const std::string& channelName, std::string buffer){
-	std::string cmd = buffer.substr(buffer.find("!bot ") + 5);
+	std::string cmd = "";
+	if (buffer.find("!bot ") == buffer.npos)
+		cmd = buffer.substr(buffer.find("!bot ") + 5);
 	if (cmd.find("help") != cmd.npos){
 		std::string botHelp = ":Mimmomodem PRIVMSG #" + channelName + " :List of bot commands:\r\nmarasco\r\nlello\r\nrickroll\r\nbobbe\r\ncoin\r\nff on\\off\r\n";
 		send(user.getSocket(), botHelp.c_str(), botHelp.length(), 0);
