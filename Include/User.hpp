@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 15:29:04 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/29 17:34:17 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ public:
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);
+
+	char buffer[1024];
+	std::string msgBuffer;
 };
 
 std::string removeCRLF(const char* buffer);

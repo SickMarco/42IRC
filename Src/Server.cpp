@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 18:11:01 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/29 17:35:16 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 	std::string command, param;
 	std::stringstream ss(newClientMessage);
 	char delim;
-	char buffer[1024];
 
     while (std::getline(ss, command, '\n')){
         ss >> command;
@@ -86,12 +85,12 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 		}
     }
 	while (userAlreadExist == true){
-		bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-        buffer[bytesRead] = '\0';
-		printStringNoP(buffer, strlen(buffer));
-		if (!strncmp(buffer, "NICK ", 5))
-			userAlreadExist = changeNick(removeCRLF(&buffer[5]), user, 1);
-		memset(buffer, 0, 1024);
+		bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
+        user.buffer[bytesRead] = '\0';
+		printStringNoP(user.buffer, strlen(user.buffer));
+		if (!strncmp(user.buffer, "NICK ", 5))
+			userAlreadExist = changeNick(removeCRLF(&user.buffer[5]), user, 1);
+		memset(user.buffer, 0, 1024);
 	}
 	return true;
 }
@@ -102,13 +101,12 @@ int Server::newClientConnected(User& user)
     ssize_t bytesRead;
     std::string newClientMessage, command, param;
 	user.setIP(IP);
-	char buffer[1024];
     while (1)
     {
-        bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
-        buffer[bytesRead] = '\0';
-        newClientMessage += buffer;
-        memset(buffer, 0, 1024);
+        bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
+        user.buffer[bytesRead] = '\0';
+        newClientMessage += user.buffer;
+        memset(user.buffer, 0, 1024);
         if (newClientMessage.find("PASS") != newClientMessage.npos &&
             newClientMessage.find("NICK") != newClientMessage.npos &&
             newClientMessage.find("USER") != newClientMessage.npos)

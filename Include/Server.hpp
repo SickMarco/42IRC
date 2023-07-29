@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 15:57:10 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/29 17:33:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ private:
 	//SOCKET
 	Socket skt;
 
-	std::string msgBuffer;
 	std::vector<User> clients;
 	Channels channels;
 	int clientsConnected;

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 18:26:46 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/29 17:38:32 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,65 +14,64 @@
 
 void Server::messageHandler(User& user)
 {
-		char buffer[1024];
-        std::memset(buffer, 0, sizeof(buffer));
-		ssize_t bytesRead = recv(user.getSocket(), buffer, sizeof(buffer) - 1, 0);
+        std::memset(user.buffer, 0, sizeof(user.buffer));
+		ssize_t bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
 		if (bytesRead < 0) {
 			perror("Receive error");
 			close(user.getSocket());
 			return ;
 		} else if (bytesRead == 0) {
-            std::memset(buffer, 0, sizeof(buffer));
-            msgBuffer.clear();
+            std::memset(user.buffer, 0, sizeof(user.buffer));
+            user.msgBuffer.clear();
             std::string exit = ":Konversation terminated!\r\n";
             quit(&exit[0], user);
 			return ;
 		}
-		printStringNoP(buffer, static_cast<std::size_t>(bytesRead));     
-        msgBuffer += std::string(buffer);
-        if (!std::strchr(buffer, '\n'))
+		printStringNoP(user.buffer, static_cast<std::size_t>(bytesRead));     
+        user.msgBuffer += std::string(user.buffer);
+        if (!std::strchr(user.buffer, '\n'))
             return ;
         commandHandler(user);
-        msgBuffer.clear();
-		std::memset(buffer, 0, sizeof(buffer));
+        user.msgBuffer.clear();
+		std::memset(user.buffer, 0, sizeof(user.buffer));
 }
 
 void Server::commandHandler(User &user)
 {
-    if(!strncmp(msgBuffer.c_str(), "JOIN ", 5))
-			channels.multiChannelJoin(user, removeCRLF(&(msgBuffer[5])));
-    else if (!strncmp(msgBuffer.c_str(), "PRIVMSG #", 9))
-        channels.messageToChannel(user, removeCRLF(&(msgBuffer[8])));
-    else if (!strncmp(msgBuffer.c_str(), "PRIVMSG ", 8))
-        messageToPrivate(user, removeCRLF(&(msgBuffer[8])));
-    else if (!strncmp(msgBuffer.c_str(), "PART ", 5))
+    if(!strncmp(user.msgBuffer.c_str(), "JOIN ", 5))
+			channels.multiChannelJoin(user, removeCRLF(&(user.msgBuffer[5])));
+    else if (!strncmp(user.msgBuffer.c_str(), "PRIVMSG #", 9))
+        channels.messageToChannel(user, removeCRLF(&(user.msgBuffer[8])));
+    else if (!strncmp(user.msgBuffer.c_str(), "PRIVMSG ", 8))
+        messageToPrivate(user, removeCRLF(&(user.msgBuffer[8])));
+    else if (!strncmp(user.msgBuffer.c_str(), "PART ", 5))
     {
-        std::string buf = removeCRLF(&(msgBuffer[5]));
+        std::string buf = removeCRLF(&(user.msgBuffer[5]));
         std::string token = std::strtok(&(buf[0]), " ");
         if (buf.find(':') == buf.npos)
             channels.leaveChannel(user, &(token[1]), buf + " :Konversation terminated!\n");
         else
             channels.leaveChannel(user, &(token[1]), buf.substr(buf.find(':')));
     }
-    else if (!strncmp(msgBuffer.c_str(), "PING", 4))
+    else if (!strncmp(user.msgBuffer.c_str(), "PING", 4))
     {
-        std::string PONG = "PONG " + std::string(std::strtok(&msgBuffer[5], "\n")) + "\r\n";
+        std::string PONG = "PONG " + std::string(std::strtok(&user.msgBuffer[5], "\n")) + "\r\n";
         send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
     }
-    else if (!strncmp(msgBuffer.c_str(), "QUIT ", 5))
-        quit(&(msgBuffer[0]), user);
-    else if (!strncmp(msgBuffer.c_str(), "NICK ", 5))
-        changeNick(&(msgBuffer[5]), user, 0);
-    else if (!strncmp(msgBuffer.c_str(), "INVITE ", 7))
-        invite(msgBuffer.substr(7, msgBuffer.length() - 1), user);
-    else if (!strncmp(msgBuffer.c_str(), "KICK #", 6))
-        kick(msgBuffer.substr(6, msgBuffer.length() - 1), user);
-    else if (!strncmp(msgBuffer.c_str(), "TOPIC ", 6))
-        channels.topic(user, removeCRLF(&msgBuffer[0]));
-    else if (!strncmp(msgBuffer.c_str(), "MODE ", 5))
-        modeHandler(user, msgBuffer);
-    else if (strncmp(msgBuffer.c_str(), "WHO ", 4) && strncmp(msgBuffer.c_str(), "USERHOST ", 9)){
-        std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&msgBuffer[0]) + " :Unknown command\r\n";
+    else if (!strncmp(user.msgBuffer.c_str(), "QUIT ", 5))
+        quit(&(user.msgBuffer[0]), user);
+    else if (!strncmp(user.msgBuffer.c_str(), "NICK ", 5))
+        changeNick(&(user.msgBuffer[5]), user, 0);
+    else if (!strncmp(user.msgBuffer.c_str(), "INVITE ", 7))
+        invite(user.msgBuffer.substr(7, user.msgBuffer.length() - 1), user);
+    else if (!strncmp(user.msgBuffer.c_str(), "KICK #", 6))
+        kick(user.msgBuffer.substr(6, user.msgBuffer.length() - 1), user);
+    else if (!strncmp(user.msgBuffer.c_str(), "TOPIC ", 6))
+        channels.topic(user, removeCRLF(&user.msgBuffer[0]));
+    else if (!strncmp(user.msgBuffer.c_str(), "MODE ", 5))
+        modeHandler(user, user.msgBuffer);
+    else if (strncmp(user.msgBuffer.c_str(), "WHO ", 4) && strncmp(user.msgBuffer.c_str(), "USERHOST ", 9)){
+        std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&user.msgBuffer[0]) + " :Unknown command\r\n";
         send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), 0);
     }
 }
