@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/29 17:33:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/29 19:33:10 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <cstring>
 #include <stdio.h>
 #include <poll.h>
+#include <sys/epoll.h>
 #include <sstream>
 #include <map>
 #include <vector>
@@ -53,8 +54,9 @@ private:
 	int clientsConnected;
 
 	//CLIENTS
-	void newClientHandler(struct pollfd* fds, int& numClients);
+	int newClientHandler(int epollFd);
 	int newClientConnected(User& user);
+	int findClientIndex(int clientSocket);
 	bool checkPassword(User& user, const std::string& PASS);
 	bool setNewUser(User& user, const std::string& newClientMessage);
 	void welcomeMsg(const User& user);
