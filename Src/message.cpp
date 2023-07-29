@@ -241,14 +241,18 @@ void Server::kick(std::string buffer, User &user)
         send(user.getSocket(),  err.c_str(), err.length(), 0);
         return ;
     }
-    std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
+    std::vector <User> & chClients = ((channels.getChannels())[channelName]).clients;
+    std::cout << "Channel clients:" << std::endl;
+    printUsers(chClients);
     if (findClient(chClients, user) == -1)
     {
         err = ERR_NOTONCHANNEL;
         send(user.getSocket(),  err.c_str(), err.length(), 0);
         return ;
     }
-    std::vector <User> chOper = ((channels.getChannels())[channelName]).operators;
+    std::vector <User> & chOper = ((channels.getChannels())[channelName]).operators;
+    std::cout << "Channel Ops:" << std::endl;
+    printUsers(chOper);
     if (findClient(chOper, user) == -1)
     {
         err = ERR_CHANOPRIVSNEEDED;
@@ -263,15 +267,13 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     channels.sendToAll(channelName, KICK);
-
+ 
+    User & target = chClients[findClientByName(chClients, name)];
     //remove op
-    std::vector<User> & channelops = ((channels.getChannels())[channelName]).operators;
-    if (findClientByName(channelops, user.getNick()) != -1)
-        channelops.erase(std::remove(channelops.begin(), channelops.end(), user), channelops.end());
+    if (findClientByName(chOper, name) != -1)
+        chOper.erase(std::remove(chOper.begin(), chOper.end(), target), chOper.end());
     // remove the user from the channel participants
-    std::vector<User> & channelusers = ((channels.getChannels())[channelName]).clients;
-    User & target = channelusers[findClientByName(channelusers, name)];
-    channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), target), channelusers.end());
+    chClients.erase(std::remove(chClients.begin(), chClients.end(), target), chClients.end());
     // Update user channel list
     user.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
 }

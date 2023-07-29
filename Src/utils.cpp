@@ -58,3 +58,12 @@ int findClientByName(std::vector <User> chClients, std::string name)
     }
     return -1;
 }
+
+void printUsers(std::vector<User> vec)
+{
+    std::vector<User> ::iterator it = vec.begin();
+    for (; it != vec.end(); it++)
+    {
+        std::cout << "\t'" << it->getNick() << "'" << std::endl;
+    }
+}

@@ -82,5 +82,6 @@ std::string removeCRLF(const char* buffer);
 void 		printStringNoP(const char* str, std::size_t length);
 int 		findClient(std::vector <User> chClients, User user);
 int 		findClientByName(std::vector <User> chClients, std::string name);
+void		printUsers(std::vector<User> vec);
 
 #endif
