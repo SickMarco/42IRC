@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 19:38:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:46:06 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,21 +40,20 @@ private:
 	//SERVER INIT
 	const std::string serverName;
 	const std::string serverPassword;
-	std::string userPassword;
 	const int port;
+	std::string userPassword;
 	std::string hostname;
 	std::string IP;
 	bool isServerRunning;
-
 	//SOCKET
 	Socket skt;
-
+	int epollFd;
+	int addSocketToEpoll(int newSocket);
+	//CLIENTS
 	std::vector<User> clients;
 	Channels channels;
 	int clientsConnected;
-
-	//CLIENTS
-	int newClientHandler(int epollFd);
+	int newClientHandler();
 	int newClientConnected(User& user);
 	int findClientIndex(int clientSocket);
 	bool checkPassword(User& user, const std::string& PASS);
@@ -63,7 +62,6 @@ private:
 	void messageHandler(User& user);
 	void commandHandler(User &user);
 	void clientDisconnected(const User& user);
-
 	//CMDS
 	int messageToPrivate(User& user, std::string buffer);
 	void quit(char * buffer, User &user);
@@ -74,7 +72,6 @@ private:
 	void kick(std::string buffer, User &user);
 
 public:
-	int epollFd;
 	Server(const int& port, const std::string& password);
 	~Server();
 

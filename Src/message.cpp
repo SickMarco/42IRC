@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 19:44:03 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:49:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ int Server::messageToPrivate(User& user, std::string buffer)
 }
 
 void Server::clientDisconnected(const User& user){
-//    std::cout << "MAMT" << std::endl;
     struct epoll_event event;
     event.events = 0;
     event.data.fd = user.getSocket();

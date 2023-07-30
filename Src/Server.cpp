@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 19:37:05 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:46:01 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), serverPassword("ktm"), userPassword(pass), port(p) , isServerRunning(true){
+Server::Server(const int& p, const std::string& pass) : serverName(":ludri"), serverPassword("ktm"),  port(p), userPassword(pass), isServerRunning(true), epollFd(-1){
 	if (port != SERVER_PORT)
 		throw std::runtime_error("Error: Wrong port!");
 	if(userPassword != serverPassword)
@@ -127,14 +127,14 @@ int Server::findClientIndex(int fd) {
     return -1;
 }
 
-int epollController(int epollFd, int socket)
+int Server::addSocketToEpoll(int newSocket)
 {
     struct epoll_event event;
     memset(&event, 0 , sizeof(event));
     event.events = EPOLLIN | EPOLLET; //set reading data with non blocking
-    event.data.fd = socket;
+    event.data.fd = newSocket;
     // Add socket to epoll and monitor events
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, socket, &event) == -1) {
+    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, newSocket, &event) == -1) {
         perror("Error adding socket to epoll");
         close(epollFd);
         return -1;
@@ -142,7 +142,7 @@ int epollController(int epollFd, int socket)
     return 0;
 }
 
-int Server::newClientHandler(int epollFd) {
+int Server::newClientHandler() {
     int i = findClientIndex(-1);
     // Accept client connection and create a new socket
     int clientSocket = accept(skt.getSocket(), (struct sockaddr*)&clients[i].getAddr(), &clients[i].getAddrLen());
@@ -154,8 +154,8 @@ int Server::newClientHandler(int epollFd) {
     // Set user socket
     clients[i].setSocket(clientSocket);
     clientsConnected++;
-    // Add the new socket to epoll
-    if (epollController(epollFd, clientSocket) < 0){
+    // Add the new socket to epollun 
+    if (addSocketToEpoll(clientSocket) < 0){
         close(clientSocket);
         clients[i].setSocket(-1);
         clientsConnected--;
@@ -174,8 +174,9 @@ void Server::run() {
         return ;
     }
     // Add server socket to epoll
-    if (epollController(epollFd, skt.getSocket()) < 0)
+    if (addSocketToEpoll(skt.getSocket()) < 0)
         return ;
+    
     struct epoll_event events[MAX_CLIENTS + 1];
     memset(events, 0 , sizeof(events));
 
@@ -187,15 +188,16 @@ void Server::run() {
             perror("epoll_wait error");
             break;
         }
+        // For each triggered event
         for (int i = 0; i < triggered; i++) {
-            int fd = events[i].data.fd;
+            int clientSocket = events[i].data.fd;
             // New client connection
-            if (fd == skt.getSocket() && clientsConnected < MAX_CLIENTS) {
-                    if (newClientHandler(epollFd) < 0) 
+            if (clientSocket == skt.getSocket()) {
+                    if (clientsConnected == MAX_CLIENTS || newClientHandler() < 0)
                         continue;
             }
             else
-                messageHandler(clients[findClientIndex(fd)]);
+                messageHandler(clients[findClientIndex(clientSocket)]);
         }
     }
     // Close all connections
