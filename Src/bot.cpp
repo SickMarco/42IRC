@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 18:22:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 18:39:49 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:12:51 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 void Channels::botCommand(const User& user, const std::string& channelName, std::string buffer){
 	std::string cmd = "";
-	if (buffer.find("!bot ") == buffer.npos)
+	if (buffer.find("!bot ") != buffer.npos)
 		cmd = buffer.substr(buffer.find("!bot ") + 5);
 	if (cmd.find("help") != cmd.npos){
 		std::string botHelp = ":Mimmomodem PRIVMSG #" + channelName + " :List of bot commands:\r\nmarasco\r\nlello\r\nrickroll\r\nbobbe\r\ncoin\r\nff on\\off\r\n";

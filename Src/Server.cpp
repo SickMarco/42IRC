@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/29 19:33:14 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 18:57:13 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,11 @@ bool Server::checkPassword(User& user, const std::string& PASS){
     return true;
 }
 
-bool Server::setNewUser(User& user, const std::string& newClientMessage){
+bool Server::setNewUser(User& user){
 	bool userAlreadExist = false;
 	ssize_t bytesRead;
 	std::string command, param;
-	std::stringstream ss(newClientMessage);
+	std::stringstream ss(user.msgBuffer);
 	char delim;
 
     while (std::getline(ss, command, '\n')){
@@ -97,57 +97,65 @@ bool Server::setNewUser(User& user, const std::string& newClientMessage){
 
 int Server::newClientConnected(User& user)
 {
-    ssize_t bytesRead;
-    std::string newClientMessage, command, param;
+    ssize_t bytesRead = 0;
 	user.setIP(IP);
     while (1)
     {
         bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
         user.buffer[bytesRead] = '\0';
-        newClientMessage += user.buffer;
+        user.msgBuffer += user.buffer;
         memset(user.buffer, 0, 1024);
-        if (newClientMessage.find("PASS") != newClientMessage.npos &&
-            newClientMessage.find("NICK") != newClientMessage.npos &&
-            newClientMessage.find("USER") != newClientMessage.npos)
+        if (user.msgBuffer.find("PASS") != user.msgBuffer.npos &&
+            user.msgBuffer.find("NICK") != user.msgBuffer.npos &&
+            user.msgBuffer.find("USER") != user.msgBuffer.npos)
                 break;
     }
-	printStringNoP(newClientMessage.c_str(), newClientMessage.length());
-	if (setNewUser(user, newClientMessage) == false)
+	printStringNoP(user.msgBuffer.c_str(), user.msgBuffer.length());
+	if (setNewUser(user) == false)
 		return 1;
+    user.msgBuffer.clear();
     welcomeMsg(user);
     return 0;
 }
 
-int Server::newClientHandler(int epollFd) {
-    if (clientsConnected == MAX_CLIENTS)
-        return -1;
-    int i;
-    for (i = 0; i < MAX_CLIENTS; ++i)
-        if (clients[i].getSocket() == -1)
-            break;
-    int clientSocket = accept(skt.getSocket(), (struct sockaddr*)&clients[i].getAddr(), &clients[i].getAddrLen());
-    if (clientSocket < 0) {
-        perror("Accept error");
-        return -1;
-    }
-    // Set the client socket to non-blocking mode
-    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
-        close(clientSocket);
-        perror("Client socket non-blocking error");
-        return -1;
-    }
 
-    clients[i].setSocket(clientSocket);
-    clientsConnected++;
+int Server::findClientIndex(int fd) {
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+        if (fd == clients[i].getSocket())
+            return i;
+    }
+    return -1;
+}
 
-     // Add the new socket to the epoll instance
+int epollController(int epollFd, int socket)
+{
     struct epoll_event event;
     memset(&event, 0 , sizeof(event));
     event.events = EPOLLIN | EPOLLET; //set reading data with non blocking
-    event.data.fd = clientSocket;
-
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, clientSocket, &event) == -1) {
+    event.data.fd = socket;
+    // Add socket to epoll and monitor events
+    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, socket, &event) == -1) {
         perror("Error adding socket to epoll");
+        close(epollFd);
+        return -1;
+    }
+    return 0;
+}
+
+int Server::newClientHandler(int epollFd) {
+    int i = findClientIndex(-1);
+    // Accept client connection and create a new socket
+    int clientSocket = accept(skt.getSocket(), (struct sockaddr*)&clients[i].getAddr(), &clients[i].getAddrLen());
+    // Set the client socket to non-blocking mode
+    if (clientSocket < 0 || fcntl(clientSocket, F_SETFL, O_NONBLOCK) < 0) {
+        clientSocket < 0 ? perror("Accept error") : perror("Client socket non-blocking error");
+        return -1;
+    }
+    // Set user socket
+    clients[i].setSocket(clientSocket);
+    clientsConnected++;
+    // Add the new socket to epoll
+    if (epollController(epollFd, clientSocket) < 0){
         close(clientSocket);
         clients[i].setSocket(-1);
         clientsConnected--;
@@ -157,53 +165,43 @@ int Server::newClientHandler(int epollFd) {
     return i;
 }
 
-int Server::findClientIndex(int clientSocket) {
-    for (int i = 0; i < MAX_CLIENTS; ++i) {
-        if (clientSocket == clients[i].getSocket())
-            return i;
-    }
-    return -1;
-}
-
 void Server::run() {
+
+    // Create epoll istance
     int epollFd = epoll_create1(0);
     if (epollFd < 0) {
         perror("epoll");
-        return;
+        return ;
     }
-    // Add server socket to epoll event list
-    struct epoll_event event;
-    memset(&event, 0 , sizeof(event));
-    event.events = EPOLLIN;
-    event.data.fd = skt.getSocket();
-
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, skt.getSocket(), &event) == -1) {
-        perror("Error adding server socket to epoll");
-        close(epollFd);
-        return;
-    }
-
-    struct epoll_event events[MAX_CLIENTS];
+    // Add server socket to epoll
+    if (epollController(epollFd, skt.getSocket()) < 0)
+        return ;
+    struct epoll_event events[MAX_CLIENTS + 1];
     memset(events, 0 , sizeof(events));
-    int numEvents;
 
+    int triggered;
     while (isServerRunning) {
-        numEvents = epoll_wait(epollFd, events, MAX_CLIENTS, 0);
-        if (numEvents < 0) {
+        // Waiting for events
+        triggered = epoll_wait(epollFd, events, MAX_CLIENTS, 0);
+        if (triggered < 0) {
             perror("epoll_wait error");
             break;
         }
-        for (int i = 0; i < numEvents; i++) {
+        for (int i = 0; i < triggered; i++) {
             int fd = events[i].data.fd;
-            if (fd == skt.getSocket()) {
-                // New client connection
-                int index = newClientHandler(epollFd);
-                if (index < 0)
-                    continue;
+            // New client connection
+            if (fd == skt.getSocket() && clientsConnected < MAX_CLIENTS) {
+                    if (newClientHandler(epollFd) < 0) 
+                        continue;
             }
             else
                 messageHandler(clients[findClientIndex(fd)]);
         }
+    }
+    // Close all connections
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+        if (clients[i].getSocket() != -1)
+            close(clients[i].getSocket());
     }
     close(epollFd);
 }

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/29 19:33:10 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 18:50:32 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ private:
 	int newClientConnected(User& user);
 	int findClientIndex(int clientSocket);
 	bool checkPassword(User& user, const std::string& PASS);
-	bool setNewUser(User& user, const std::string& newClientMessage);
+	bool setNewUser(User& user);
 	void welcomeMsg(const User& user);
 	void messageHandler(User& user);
 	void commandHandler(User &user);

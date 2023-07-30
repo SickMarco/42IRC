@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/28 18:37:39 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 18:32:44 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ bool Channels::channelExist(std::string channelName)
 
 void Channels::censorshipBot(std::string &mex)
 {
-    std::ifstream inputFile(".bannedWords.txt");
+    std::ifstream inputFile("./Src/.bannedWords.txt");
     
     if (!inputFile)
         return ;
