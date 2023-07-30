@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/29 17:38:32 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:44:03 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void Server::messageHandler(User& user)
             quit(&exit[0], user);
 			return ;
 		}
-		printStringNoP(user.buffer, static_cast<std::size_t>(bytesRead));     
+		printStringNoP(user.buffer, strlen(user.buffer));   
         user.msgBuffer += std::string(user.buffer);
         if (!std::strchr(user.buffer, '\n'))
             return ;
@@ -103,6 +103,15 @@ int Server::messageToPrivate(User& user, std::string buffer)
     return 0;
 }
 
+void Server::clientDisconnected(const User& user){
+    std::cout << "MAMT" << std::endl;
+    struct epoll_event event;
+    event.events = 0;
+    event.data.fd = user.getSocket();
+    if (epoll_ctl(epollFd, EPOLL_CTL_DEL, user.getSocket(), &event) < 0)
+        perror("Error removing client from epoll");
+}
+
 void Server::quit(char * buffer, User &user)
 {
     std::string buf = buffer;
@@ -110,7 +119,8 @@ void Server::quit(char * buffer, User &user)
     std::string quitmsg = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
     for (; it2 != clients.end(); ++it2)
         send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
-
+    // Remove socket client from epoll
+    clientDisconnected(user);
     close(user.getSocket());
     user.setSocket(-1);
 	if (!strncmp(&buffer[6], "ragequit", 8)) // Server shutdown, only for valgrind test
@@ -165,7 +175,6 @@ void Server::quit(char * buffer, User &user)
     user.getChannels().clear();
     memset(user.buffer, 0, sizeof(user.buffer));
 	user.msgBuffer.clear();
-    
     clientsConnected--;
 }
 

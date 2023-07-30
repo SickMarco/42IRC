@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 18:50:32 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:38:25 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ private:
 	void welcomeMsg(const User& user);
 	void messageHandler(User& user);
 	void commandHandler(User &user);
+	void clientDisconnected(const User& user);
 
 	//CMDS
 	int messageToPrivate(User& user, std::string buffer);
@@ -73,6 +74,7 @@ private:
 	void kick(std::string buffer, User &user);
 
 public:
+	int epollFd;
 	Server(const int& port, const std::string& password);
 	~Server();
 
