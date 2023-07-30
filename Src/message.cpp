@@ -104,7 +104,7 @@ int Server::messageToPrivate(User& user, std::string buffer)
 }
 
 void Server::clientDisconnected(const User& user){
-    std::cout << "MAMT" << std::endl;
+//    std::cout << "MAMT" << std::endl;
     struct epoll_event event;
     event.events = 0;
     event.data.fd = user.getSocket();
@@ -117,12 +117,9 @@ void Server::quit(char * buffer, User &user)
     std::string buf = buffer;
     std::vector <User> ::iterator it2 = clients.begin();
     std::string quitmsg = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
-    for (; it2 != clients.end(); ++it2)
-        send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
-    // Remove socket client from epoll
-    clientDisconnected(user);
-    close(user.getSocket());
-    user.setSocket(-1);
+    for (; it2 != clients.end(); ++it2) {
+        send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);}
+    
 	if (!strncmp(&buffer[6], "ragequit", 8)) // Server shutdown, only for valgrind test
 		isServerRunning = false;
     
@@ -141,7 +138,11 @@ void Server::quit(char * buffer, User &user)
             // remove the user from the channel participants
             chClients.erase(std::remove(chClients.begin(), chClients.end(), user), chClients.end());
             
-            if (findClient(chOper, user) != -1)
+            //remove channel if there are no more users in the channel
+            if  (chClients.size() == 0 ||
+                (chClients.size() == 1 && findClientByName(chClients, "Mimmomodem") != -1))
+                    channels.getChannels().erase(*it);
+            else if (findClient(chOper, user) != -1)
             {   
                 //remove op
                 chOper.erase(std::remove(chOper.begin(), chOper.end(), user), chOper.end());
@@ -163,6 +164,11 @@ void Server::quit(char * buffer, User &user)
             }
         }
     }
+
+    // Remove socket client from epoll
+    clientDisconnected(user);
+    close(user.getSocket());
+    user.setSocket(-1);
 
     //cleaning user data
     user.setNick("");
@@ -336,4 +342,25 @@ void Server::kick(std::string buffer, User &user)
     chClients.erase(std::remove(chClients.begin(), chClients.end(), target), chClients.end());
     // Update user channel list
     target.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
+    
+    //(if you kicked yourserlf)
+    //remove channel if there are no more users in the channel
+    if  (chClients.size() == 0 ||    
+        (chClients.size() == 1 && findClientByName(chClients, "Mimmomodem") != -1))
+            channels.getChannels().erase(channelName); 
+    //if no more op, assign op
+    else if (chOper.size() == 0 || (chOper.size() == 1 && findClientByName(chOper, "Mimmomodem") != -1) )
+    {
+        std::vector<User>::iterator itUser = chClients.begin();
+        for (; itUser != chClients.end(); ++itUser)
+        {
+            if (itUser->getNick().compare("Mimmomodem") != 0)
+            {
+                chOper.push_back(*itUser);
+                std::string newOp = serverName + " MODE #" + channelName + " +o " + itUser->getNick() + "\r\n";
+                channels.sendToAll(channelName, newOp);
+                break ;
+            }
+        }
+    }
 }

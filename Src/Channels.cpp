@@ -118,7 +118,7 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
         for (; itc != it->second.clients.end(); ++itc)
             send(itc->getSocket(), PART.c_str(), PART.length(), 0);
         
-        // Channel exists, remove the user from the channel participants
+        //remove the user from the channel participants
         std::vector<User> & channelusers = it->second.clients;
         channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
         
@@ -130,8 +130,10 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
         // Update user channel list
         user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
         
-        //give op if there are no more op in the channel
-        if  (channelops.size() == 0 ||
+        if  (channelusers.size() == 0 ||    //remove channel if there are no more users in the channel
+            (channelusers.size() == 1 && findClientByName(channelusers, "Mimmomodem") != -1))
+            channels.erase(channelName);
+        else if  (channelops.size() == 0 ||  //give op if there are no more op in the channel
             (channelops.size() == 1 && findClientByName(channelops, "Mimmomodem") != -1))
         {
             std::vector<User>::iterator itUser = channelusers.begin();
