@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 18:57:13 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:37:05 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int Server::newClientHandler(int epollFd) {
 void Server::run() {
 
     // Create epoll istance
-    int epollFd = epoll_create1(0);
+    epollFd = epoll_create1(0);
     if (epollFd < 0) {
         perror("epoll");
         return ;
