@@ -160,8 +160,6 @@ void Server::quit(char * buffer, User &user)
                     }
                 }
             }
-            // remove the user from the channel participants
-            chClients.erase(std::remove(chClients.begin(), chClients.end(), user), chClients.end());
         }
     }
 
@@ -336,5 +334,5 @@ void Server::kick(std::string buffer, User &user)
     // remove the user from the channel participants
     chClients.erase(std::remove(chClients.begin(), chClients.end(), target), chClients.end());
     // Update user channel list
-    user.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
+    target.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
 }
