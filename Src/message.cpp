@@ -39,7 +39,7 @@ void Server::messageHandler(User& user)
 void Server::commandHandler(User &user)
 {
     std::string const & str = user.msgBuffer;
-    if(str.length() >= 8 && !strncmp(str.c_str(), "JOIN ", 5))
+    if(str.length() >= 8 && !strncmp(str.c_str(), "JOIN #", 6))
 			channels.multiChannelJoin(user, removeCRLF(&(str[5])));
     else if (str.length() >= 12 && !strncmp(str.c_str(), "PRIVMSG #", 9))
         channels.messageToChannel(user, removeCRLF(&(str[8])));
@@ -115,9 +115,57 @@ void Server::quit(char * buffer, User &user)
     user.setSocket(-1);
 	if (!strncmp(&buffer[6], "ragequit", 8)) // Server shutdown, only for valgrind test
 		isServerRunning = false;
+    
+    /*for every channel in which the user is in
+      remove the user from the list of channel clients 
+      and channel operators(if no more operators assign op)*/
+    std::vector <std::string> ::iterator it = user.getChannels().begin();
+    for (; it != user.getChannels().end(); it++)
+    {
+        std::map<std::string, Channel> ::iterator cc = channels.getChannels().find(*it);
+        if (cc != channels.getChannels().end())
+        {
+            std::vector<User> & chClients = cc->second.clients;
+            std::vector<User> & chOper = cc->second.operators;
+            
+            // remove the user from the channel participants
+            chClients.erase(std::remove(chClients.begin(), chClients.end(), user), chClients.end());
+            
+            if (findClient(chOper, user) != -1)
+            {   
+                //remove op
+                chOper.erase(std::remove(chOper.begin(), chOper.end(), user), chOper.end());
+                //give op if no more op
+                if (chOper.size() == 0 || (chOper.size() == 1 && findClientByName(chOper, "Mimmomodem") != -1) )
+                {
+                    std::vector<User>::iterator itUser = chClients.begin();
+                    for (; itUser != chClients.end(); ++itUser)
+                    {
+                        if (itUser->getNick().compare("Mimmomodem") != 0)
+                        {
+                            chOper.push_back(*itUser);
+                            std::string newOp = serverName + " MODE #" + *it + " +o " + itUser->getNick() + "\r\n";
+                            channels.sendToAll(*it, newOp);
+                            break ;
+                        }
+                    }
+                }
+            }
+            // remove the user from the channel participants
+            chClients.erase(std::remove(chClients.begin(), chClients.end(), user), chClients.end());
+        }
+    }
+
+    //cleaning user data
     user.setNick("");
     user.setUser("");
     user.setIP("");
+    memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
+    memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
+    user.getChannels().clear();
+    memset(user.buffer, 0, sizeof(user.buffer));
+	user.msgBuffer.clear();
+    
     clientsConnected--;
 }
 
@@ -137,12 +185,10 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         }
     }
     
-    //std::string nickmsg = ":" + user.getNick() + " NICK " + buffer + "\r\n";
     std::string nickmsg2 = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " NICK :" + buffer + "\r\n";
     
     if (flag == 0)
     {
-    //    std::cout << nickmsg;
         //search in channels and change nick
         std::vector<std::string>::iterator it2 = user.getChannels().begin();
         for (; it2 != user.getChannels().end(); it2++)
@@ -164,10 +210,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     {    
         it = clients.begin();
         for (; it != clients.end(); it++)
-        {
-        //    send(it->getSocket(), nickmsg.c_str(), nickmsg.length(), 0);
             send(it->getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);
-        }
     }
     return 0;
 }
