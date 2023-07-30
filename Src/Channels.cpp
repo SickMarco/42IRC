@@ -52,7 +52,7 @@ int Channels::messageToChannel(const User& user, std::string buffer)
         return 0;
     }
 
-    if (buffer.find("!bot ") != buffer.npos){
+    if (buffer.find("!bot ") != buffer.npos && findClientByName(channels[channelName].clients ,"Mimmomodem") != -1){
 		botCommand(user, channelName, buffer);
 		return 1;
 	}
