@@ -191,7 +191,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     std::vector <User> ::iterator it = clients.begin();
     for (; it != clients.end(); it++)
     {
-        if (buffer == it->getNick())
+        if (buffer == it->getNick() || !buffer.compare("Mimmomodem"))
         {
             //send Nickname already taken and than return 
             std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
