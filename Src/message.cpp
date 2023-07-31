@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 20:49:25 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 14:32:54 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,14 +103,6 @@ int Server::messageToPrivate(User& user, std::string buffer)
     return 0;
 }
 
-void Server::clientDisconnected(const User& user){
-    struct epoll_event event;
-    event.events = 0;
-    event.data.fd = user.getSocket();
-    if (epoll_ctl(epollFd, EPOLL_CTL_DEL, user.getSocket(), &event) < 0)
-        perror("Error removing client from epoll");
-}
-
 void Server::quit(char * buffer, User &user)
 {
     std::string buf = buffer;
@@ -165,7 +157,8 @@ void Server::quit(char * buffer, User &user)
     }
 
     // Remove socket client from epoll
-    clientDisconnected(user);
+    if (epoll_ctl(epollFd, EPOLL_CTL_DEL, user.getSocket(), NULL) < 0)
+        perror("Error removing client from epoll");
     close(user.getSocket());
     user.setSocket(-1);
 
