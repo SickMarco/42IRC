@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:15:30 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:53:10 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,18 +38,6 @@ void Server::modeHandler(const User& user, std::string buffer){
 		channels.setModeKey(user, &(buffer[6]), mode);
 	else if (mode.find('l') != std::string::npos)
 		channels.setModeUserLimit(user, buffer, mode);
-}
-
-std::string extractNick(const std::string& buffer) {
-    size_t startPos = buffer.find_first_of("+-");
-	std::string username;
-    if (startPos != std::string::npos) {
-		std::stringstream ss(&(buffer[startPos]));
-		ss >> username;
-		ss >> username;
-        return removeCRLF(username.c_str());
-    }
-    return "";
 }
 
 void Channels::setModeOperator(const User& user, std::string buffer, const std::string& flag){

@@ -1,15 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   joinChannel.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/07/31 15:51:36 by mbozzi            #+#    #+#             */
+/*   Updated: 2023/07/31 15:51:37 by mbozzi           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Channels.hpp"
-
-std::vector<std::string> Channels::split(std::string s, char delimiter)
-{
-    std::vector<std::string> splitted;
-    std::string token;
-    std::istringstream tokenStream(s);
-
-    while (std::getline(tokenStream, token, delimiter))
-        splitted.push_back(token);
-    return splitted;
-}
 
 void Channels::multiChannelJoin(User& user, std::string buffer)
 {

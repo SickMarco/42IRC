@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 16:02:40 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:53:14 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,27 @@ void printUsers(std::vector<User> vec)
     {
         std::cout << "\t'" << it->getNick() << "'" << std::endl;
     }
+}
+
+std::vector<std::string> split(std::string s, char delimiter)
+{
+    std::vector<std::string> splitted;
+    std::string token;
+    std::istringstream tokenStream(s);
+
+    while (std::getline(tokenStream, token, delimiter))
+        splitted.push_back(token);
+    return splitted;
+}
+
+std::string extractNick(const std::string& buffer) {
+    size_t startPos = buffer.find_first_of("+-");
+	std::string username;
+    if (startPos != std::string::npos) {
+		std::stringstream ss(&(buffer[startPos]));
+		ss >> username;
+		ss >> username;
+        return removeCRLF(username.c_str());
+    }
+    return "";
 }

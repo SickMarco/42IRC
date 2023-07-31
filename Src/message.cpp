@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:16:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 16:17:50 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,9 +101,14 @@ int Server::messageToPrivate(User& user, std::string buffer)
             break;
         }
     }
+	if (it == clients.end()){
+		std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + name + " :No such nick\r\n";
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
+		return -1;
+	}
     std::string PRIVMSG = ":" + user.getNick() + "! PRIVMSG " + name + " " + mex + "\r\n";
 
-    if (user.getNick() != name)
+    if (user.getNick() != name && clientSocket != -1)
         send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
     return 0;
 }
@@ -213,9 +218,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
                 it4->setNick(&(buffer[0]));
         }
     }
-    
-    user.setNick(&(buffer[0]));//set new nickname
-    
+    user.setNick(&(buffer[0]));	//set new nickname
     if (flag == 0)
     {    
         it = clients.begin();
@@ -289,8 +292,6 @@ void Server::kick(std::string buffer, User &user)
     std::getline(ss, mex, ' ');
     std::getline(ss, mex, '\n');
 
-//    std::cout << "'" << channelName << "' '" << name << "' '" << mex << "'" << std::endl;
-    
     std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";
     std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
@@ -305,8 +306,7 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     std::vector <User> & chClients = ((channels.getChannels())[channelName]).clients;
-//    std::cout << "Channel clients:" << std::endl;
-//   printUsers(chClients);
+
     if (findClient(chClients, user) == -1)
     {
         err = ERR_NOTONCHANNEL;
@@ -314,8 +314,7 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     std::vector <User> & chOper = ((channels.getChannels())[channelName]).operators;
-//    std::cout << "Channel Ops:" << std::endl;
-//    printUsers(chOper);
+
     if (findClient(chOper, user) == -1)
     {
         err = ERR_CHANOPRIVSNEEDED;

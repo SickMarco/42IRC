@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 20:46:01 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:57:18 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,6 @@ int Server::newClientConnected(User& user)
     return 0;
 }
 
-
 int Server::findClientIndex(int fd) {
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         if (fd == clients[i].getSocket())
@@ -143,7 +142,9 @@ int Server::addSocketToEpoll(int newSocket)
 }
 
 int Server::newClientHandler() {
-    int i = findClientIndex(-1);
+    int i = findClientIndex(-1); 
+    if (i < 0)
+        return -1;
     // Accept client connection and create a new socket
     int clientSocket = accept(skt.getSocket(), (struct sockaddr*)&clients[i].getAddr(), &clients[i].getAddrLen());
     // Set the client socket to non-blocking mode

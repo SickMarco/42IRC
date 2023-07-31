@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:00:22 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:51:39 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ int Channels::messageToChannel(const User& user, std::string buffer)
 		return 1;
 	}
 
-    
     if (it != channels.end())
     {
         if ((channels[channelName]).censorship == true)
@@ -90,13 +89,11 @@ int  Channels::checkChannelModes(const User& user, const std::string channelName
             send(user.getSocket(), ERR_INVITEONLYCHAN.c_str(), ERR_INVITEONLYCHAN.length(), 0);
             return 1;
         }
-    //    if (it->second.banlist.find(user.getNick()) != it->second.banlist.end()){} //if user has been banned from channel, abort joining
         if (it->second.userLimit == true && it->second.userMax <= it->second.clients.size() && findClientByName(it->second.clients, user.getNick()) == -1){
             std::string ERR_CHANNELISFULL = serverName + " 471 " + user.getNick() + " #" + channelName + " :Channel is full (+l)\r\n";
             send(user.getSocket(), ERR_CHANNELISFULL.c_str(), ERR_CHANNELISFULL.length(), 0);
             return 1;
         }
-
         if ((!channels[channelName].passKey.empty()) && channels[channelName].passKey != key)
         {
         //    std::cout << "'" << channels[channelName].passKey << "'  '" << key << std::endl;
@@ -116,21 +113,17 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
     if (it != channels.end())
     {
         std::string PART = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname +" PART :#" + channelName + "\r\n";
-        
         //Notify all channel users
         std::vector<User>::iterator itc = it->second.clients.begin();
         for (; itc != it->second.clients.end(); ++itc)
             send(itc->getSocket(), PART.c_str(), PART.length(), 0);
-        
         //remove the user from the channel participants
         std::vector<User> & channelusers = it->second.clients;
         channelusers.erase(std::remove(channelusers.begin(), channelusers.end(), user), channelusers.end());
-        
         //remove op
         std::vector<User> & channelops = it->second.operators;
         if (findClientByName(channelops, user.getNick()) != -1)
             channelops.erase(std::remove(channelops.begin(), channelops.end(), user), channelops.end());
-        
         // Update user channel list
         user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
         
