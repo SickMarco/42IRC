@@ -59,7 +59,7 @@ void Server::commandHandler(User &user)
         std::string PONG = "PONG " + std::string(std::strtok(&user.msgBuffer[5], "\n")) + "\r\n";
         send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
     }
-    else if (str.length() >= 7 && !strncmp(str.c_str(), "QUIT ", 5))
+    else if (str.length() >= 8 && !strncmp(str.c_str(), "QUIT :", 6))
         quit(&(user.msgBuffer[0]), user);
     else if (str.length() >= 7 && !strncmp(str.c_str(), "NICK ", 5))
         changeNick(&(str[5]), user, 0);
@@ -113,7 +113,7 @@ void Server::clientDisconnected(const User& user){
 
 void Server::quit(char * buffer, User &user)
 {
-    std::string buf = buffer;
+    std::string buf = removeCRLF(buffer);
     std::vector <User> ::iterator it2 = clients.begin();
     std::string quitmsg = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
     for (; it2 != clients.end(); ++it2) {
