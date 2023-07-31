@@ -30,7 +30,7 @@ $(OBJ_DIR)%.o: %.cpp
 
 $(NAME): $(OBJP)
 	@$(CC) $(CFLAGS) $(OBJP) -o $(NAME)
-	@echo "\033[32m\nCompiled ✅\033[0;37m"
+	@echo "\033[32m\rCompiled ✅                       \033[0;37m"
 
 clean:
 	@echo "\033[0;31mCleaning objects🧹"
