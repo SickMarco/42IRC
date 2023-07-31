@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:51:39 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 16:26:53 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,11 @@ int Channels::messageToChannel(const User& user, std::string buffer)
         return 0;
     }
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
-    if (it == channels.end())
-        return 0;
+    if (it == channels.end()){
+		std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + channelName + " :No such channel\r\n";
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
+		return -1;
+	}
     
     if (findClientByName(channels[channelName].clients, user.getNick()) == -1)
     {
@@ -109,6 +112,11 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
 {
     // Check if the channel exists
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
+    if (it == channels.end()){
+		std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + channelName + " :No such channel\r\n";
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
+		return ;
+	}
     (void )message;
     if (it != channels.end())
     {
