@@ -99,16 +99,24 @@ int Server::newClientConnected(User& user)
 {
     ssize_t bytesRead = 0;
 	user.setIP(IP);
+    int time_begins = time(NULL);
+    int time_now = time_begins;
     while (1)
     {
+        if (time_now - time_begins > 15)
+        {
+            std::cout << "timeout" << std::endl;
+            return 1;
+        }
         bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
         user.buffer[bytesRead] = '\0';
         user.msgBuffer += user.buffer;
         memset(user.buffer, 0, 1024);
-        if (user.msgBuffer.find("PASS") != user.msgBuffer.npos &&
-            user.msgBuffer.find("NICK") != user.msgBuffer.npos &&
-            user.msgBuffer.find("USER") != user.msgBuffer.npos)
+        if (user.msgBuffer.find("PASS ") != user.msgBuffer.npos &&
+            user.msgBuffer.find("NICK ") != user.msgBuffer.npos &&
+            user.msgBuffer.find("USER ") != user.msgBuffer.npos)
                 break;
+        time_now = time(NULL);
     }
     std::cout << user.msgBuffer << std::flush;
 	if (setNewUser(user) == false)
