@@ -230,7 +230,7 @@ void Channels::topic(const User& user, std::string buffer){
     if (it != channels.end()){
         if (buffer.find(':') == std::string::npos){    //SEND TOPIC
             std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
-            send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
+            send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), sndFlags);
         }
         else if (it->second.topicMode == false)    //CHECK TOPIC MODE AND SET TOPIC
             setTopic(user, channelName, arg);
@@ -239,7 +239,7 @@ void Channels::topic(const User& user, std::string buffer){
     }
     else {
         std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + channelName + " :No such channel\r\n";
-		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
     }
 }
 
