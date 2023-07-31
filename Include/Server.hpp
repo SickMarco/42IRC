@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 14:58:33 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:58:24 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ public:
 };
 
 std::string removeCRLF(const char* buffer);
-void 		printStringNoP(const char* str, std::size_t length);
 int 		findClient(std::vector <User> chClients, User user);
 int 		findClientByName(std::vector <User> chClients, std::string name);
 void		printUsers(std::vector<User> vec);

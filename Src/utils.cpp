@@ -6,24 +6,12 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/15 19:37:31 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:53:14 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:58:19 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "User.hpp"
-
-void printStringNoP(const char* str, std::size_t length) {
-    for (std::size_t i = 0; i < length; ++i) {
-        if (std::isprint(static_cast<unsigned char>(str[i]))) {
-            std::cout << str[i]  << std::flush;
-        } else {
-            std::cout << "\\x" << std::hex << static_cast<int>(str[i])  << std::flush;
-            std::cout << std::dec;
-        }
-    }
-	std::cout << std::endl << std::flush;
-}
 
 std::string removeCRLF(const char* buffer){
     std::string ret = buffer;

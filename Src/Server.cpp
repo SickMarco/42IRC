@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:57:18 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 20:04:46 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ bool Server::setNewUser(User& user){
 	while (userAlreadExist == true){
 		bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
         user.buffer[bytesRead] = '\0';
-		printStringNoP(user.buffer, strlen(user.buffer));
+        std::cout << user.buffer << std::flush;
 		if (!strncmp(user.buffer, "NICK ", 5))
 			userAlreadExist = changeNick(removeCRLF(&user.buffer[5]), user, 1);
 		memset(user.buffer, 0, 1024);
@@ -110,7 +110,7 @@ int Server::newClientConnected(User& user)
             user.msgBuffer.find("USER") != user.msgBuffer.npos)
                 break;
     }
-	printStringNoP(user.msgBuffer.c_str(), user.msgBuffer.length());
+    std::cout << user.msgBuffer << std::flush;
 	if (setNewUser(user) == false)
 		return 1;
     user.msgBuffer.clear();
