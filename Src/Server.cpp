@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 20:04:46 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 21:50:52 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void Server::welcomeMsg(const User& user){
 }
 
 bool Server::checkPassword(User& user, const std::string& PASS){
+    std::cout << PASS << " " << serverPassword << std::endl;
     if (PASS != serverPassword && !serverPassword.empty())
     {
         std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
@@ -56,6 +57,11 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         user.setNick("");
         user.setUser("");
         user.setIP("");
+        user.msgBuffer.clear();
+        memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
+        memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
+        memset(user.buffer, 0, sizeof(user.buffer));
+        clientsConnected--;
         return false;
     }
     return true;
@@ -64,23 +70,24 @@ bool Server::checkPassword(User& user, const std::string& PASS){
 bool Server::setNewUser(User& user){
 	bool userAlreadExist = false;
 	ssize_t bytesRead;
-	std::string command, param;
+	std::string line, command, param;
 	std::stringstream ss(user.msgBuffer);
 	char delim;
 
-    while (std::getline(ss, command, '\n')){
-        ss >> command;
+    while (std::getline(ss, line, '\n')){
+        std::istringstream iss(line);
+        iss >> command;
         if (command.find("PASS") != command.npos){
-			ss >> delim >> param;
+			iss >> delim >> param;
             if (checkPassword(user, param) == false)
                 return false;
 		}
         else if (command.find("NICK") != command.npos){
-			ss >> param;
+			iss >> param;
 			userAlreadExist = changeNick(removeCRLF(param.c_str()), user, 1);
 		}
         else if (command.find("USER") != command.npos){
-			ss >> param;
+			iss >> param;
 			user.setUser(removeCRLF(param.c_str()));
 		}
     }
@@ -103,6 +110,7 @@ int Server::newClientConnected(User& user)
     {
         bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
         user.buffer[bytesRead] = '\0';
+        std::cout << user.buffer << std::flush;
         user.msgBuffer += user.buffer;
         memset(user.buffer, 0, 1024);
         if (user.msgBuffer.find("PASS") != user.msgBuffer.npos &&
