@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/27 18:36:28 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:23:41 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ public:
 	std::vector<std::string> split(std::string s, char delimiter);
 	void botCommand(const User& user, const std::string& channelName, std::string buffer);
 	void censorshipBot(std::string & mex);
+	void unknownCommand(const User& user, const std::string& cmd);
 };
 
 int findClientByName(std::vector <User> chClients, std::string name);

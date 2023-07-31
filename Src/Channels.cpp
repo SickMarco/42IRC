@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 18:32:44 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:00:22 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,6 +215,8 @@ void Channels::setTopic(const User& user, const std::string& channelName, const 
 void Channels::topic(const User& user, std::string buffer){
     size_t index1 = buffer.find('#');
     size_t index2 = buffer.find(':');
+    if (index1 == buffer.npos || index2 == buffer.npos)
+        return unknownCommand(user, buffer);
 
     std::string channelName = buffer.substr(index1 + 1, index2 - index1 - 2);
     std::string arg = buffer.substr(index2 + 1);
@@ -267,4 +269,10 @@ void Channels::censorshipBot(std::string &mex)
             }
         }
     }
+}
+
+void Channels::unknownCommand(const User& user, const std::string& cmd)
+{
+    std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(cmd.c_str()) + " :Unknown command\r\n";
+    send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), 0);
 }

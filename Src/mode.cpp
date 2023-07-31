@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/25 18:43:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:15:30 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,11 +141,17 @@ void Channels::setModeUserLimit(const User& user, std::string buffer, const std:
 
 void Channels::setModeKey(const User& user, std::string buffer, std::string mode)
 {
-	std::string channelName = buffer.substr(0, buffer.find(' '));
-	std::string chPass;
+	std::string channelName, chPass, err, garbage;
 	std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
-	std::string err;
 
+	std::istringstream iss(buffer);
+	iss >> channelName >> garbage >> chPass;
+
+	if (chPass.empty() && !mode.compare("+k")){
+		std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + mode + " :Not enough parameters\r\n";
+		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), 0);
+		return ;
+	}
 	if (channelExist(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
@@ -156,11 +162,7 @@ void Channels::setModeKey(const User& user, std::string buffer, std::string mode
 		return ;
 	
 	if (mode == "+k")
-	{
-		chPass = buffer.substr(buffer.find(mode) + 3, buffer.npos);
-		chPass = chPass.substr(0, chPass.length() - 1);
 		channels[channelName].passKey = chPass;
-	}
 	else if (mode == "-k")
 		channels[channelName].passKey.clear();
 

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 14:32:54 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 15:16:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,8 +315,7 @@ void Server::kick(std::string buffer, User &user)
     {
         err = ERR_CHANOPRIVSNEEDED;
         send(user.getSocket(),  err.c_str(), err.length(), 0);
-        return ;// = buffer.substr(0, buffer.length() - 1);
-
+        return ;
     }
     if (findClientByName(chClients, name) == -1)
     {
