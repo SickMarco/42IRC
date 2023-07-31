@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 16:17:50 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 17:38:53 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ void Server::messageHandler(User& user)
             quit(&exit[0], user);
 			return ;
 		}
-		printStringNoP(user.buffer, strlen(user.buffer));   
+		printStringNoP(user.buffer, strlen(user.buffer));
+		std::cout << " END" << std::endl;   
         user.msgBuffer += std::string(user.buffer);
         if (!std::strchr(user.buffer, '\n'))
             return ;

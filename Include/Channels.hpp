@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:14 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:53:29 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 17:46:19 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ private:
 	int  checkChannelModes(const User& user, const std::string channelName, const std::string& key);
 	bool checkOperator(const User& user, const std::string& channelName);
 	void joinMessageSequence(const User& user, const std::string& channelName);
-	void setTopic(const User& user, const std::string& channelName, const std::string& arg);
+	void setTopic(const User& user, const std::string& channelName, std::string& arg);
 
 public:
 	Channels();
