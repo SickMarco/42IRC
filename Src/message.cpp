@@ -85,6 +85,11 @@ int Server::messageToPrivate(User& user, std::string buffer)
     std::string mex;
     std::getline(ss, mex, ' ');
     std::getline(ss, mex, '\n');
+    if (mex[0] != ':')
+    {
+        channels.unknownCommand(user, buffer);
+        return 1;
+    }
 
     int clientSocket = -1;
     std::vector<User> ::iterator it = clients.begin();

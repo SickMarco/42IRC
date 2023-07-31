@@ -41,7 +41,11 @@ int Channels::messageToChannel(const User& user, std::string buffer)
     std::getline(ss, mex, ' ');
     std::getline(ss, mex, '\n');
     std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
-    
+    if (mex[0] != ':')
+    {
+        unknownCommand(user, buffer);
+        return 0;
+    }
     std::map<std::string, Channel >::iterator it = channels.find(channelName);
     if (it == channels.end())
         return 0;
