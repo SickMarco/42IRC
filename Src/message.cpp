@@ -64,9 +64,9 @@ void Server::commandHandler(User &user)
     else if (str.length() >= 7 && !strncmp(str.c_str(), "NICK ", 5))
         changeNick(&(str[5]), user, 0);
     else if (str.length() >= 12 && !strncmp(str.c_str(), "INVITE ", 7))
-        invite(str.substr(7, str.length() - 1), user);
+        invite(removeCRLF(str.substr(7).c_str()), user);
     else if (str.length() >= 10 && !strncmp(str.c_str(), "KICK #", 6))
-        kick(str.substr(6, str.length() - 1), user);
+        kick(removeCRLF(str.substr(6).c_str()), user);
     else if (str.length() >= 7 && !strncmp(str.c_str(), "TOPIC ", 6))
         channels.topic(user, removeCRLF(&str[0]));
     else if (str.length() >= 9 && !strncmp(str.c_str(), "MODE ", 5))
