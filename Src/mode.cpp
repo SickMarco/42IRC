@@ -53,7 +53,14 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 		if (!flag.compare("+o"))
 			it->second.operators.push_back(it->second.clients[ind]);
 		else if (!flag.compare("-o"))
+		{
+			if (newOper == user.getNick() && channels[channelName].operators.size() == 1)
+			{
+				send(user.getSocket(), "ERROR You are un coglione\r\n", std::string("ERROR You are un coglione\r\n").length(), sndFlags);
+				return;
+			}
 			it->second.operators.erase(std::find(it->second.operators.begin(), it->second.operators.end(), user));
+		}
 		std::string setOperator = serverName + " MODE #" + channelName + " " + flag + " " +  newOper + "\r\n";
 		sendToAll(channelName, setOperator);
 	}
