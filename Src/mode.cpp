@@ -58,6 +58,11 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 			it->second.operators.push_back(it->second.clients[idx]);
 		else if (!flag.compare("-o"))
 		{
+			if (findClientByName(channels[channelName].operators, newOper) != -1)
+			{
+				send(user.getSocket(), ("ERROR " + newOper + " is not an operator\r\n").c_str(), std::string("ERROR " + newOper + " is not an operator\r\n").length(), sndFlags);
+				return;
+			}
 			if (newOper == user.getNick() && channels[channelName].operators.size() == 1)
 			{
 				send(user.getSocket(), "ERROR You are un coglione\r\n", std::string("ERROR You are un coglione\r\n").length(), sndFlags);
