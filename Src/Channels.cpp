@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 16:26:53 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 17:54:59 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,7 +208,8 @@ bool Channels::checkOperator(const User& user, const std::string& channelName){
     return false;
 }
 
-void Channels::setTopic(const User& user, const std::string& channelName, const std::string& arg){
+void Channels::setTopic(const User& user, const std::string& channelName, std::string& arg){
+    arg.erase(std::remove(arg.begin(), arg.end(), ':'), arg.end());
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
     if (it != channels.end()) {
         it->second.topic = arg;
@@ -218,24 +219,27 @@ void Channels::setTopic(const User& user, const std::string& channelName, const 
 }
 
 void Channels::topic(const User& user, std::string buffer){
-    size_t index1 = buffer.find('#');
-    size_t index2 = buffer.find(':');
-    if (index1 == buffer.npos || index2 == buffer.npos)
-        return unknownCommand(user, buffer);
+    std::string cmd, channelName, arg;
 
-    std::string channelName = buffer.substr(index1 + 1, index2 - index1 - 2);
-    std::string arg = buffer.substr(index2 + 1);
+    buffer.erase(std::remove(buffer.begin(), buffer.end(), '#'), buffer.end());
+
+    std::istringstream iss(buffer);
+    iss >> cmd >> channelName >> arg;
 
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
     if (it != channels.end()){
         if (buffer.find(':') == std::string::npos){    //SEND TOPIC
             std::string RPL_TOPIC = serverName + " 332 " + user.getNick() + " #" + channelName + " :" + it->second.topic + "\r\n";
-            send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), sndFlags);
+            send(user.getSocket(), RPL_TOPIC.c_str(), RPL_TOPIC.length(), 0);
         }
         else if (it->second.topicMode == false)    //CHECK TOPIC MODE AND SET TOPIC
             setTopic(user, channelName, arg);
         else if (it->second.topicMode == true && checkOperator(user, channelName)) //TOPIC MODE ON, CHECK OPERATOR AND SET TOPIC
             setTopic(user, channelName, arg);
+    }
+    else {
+        std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + channelName + " :No such channel\r\n";
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
     }
 }
 
