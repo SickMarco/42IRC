@@ -36,20 +36,20 @@ void Server::welcomeMsg(const User& user){
     std::string RPL_CREATED = serverName + " 003 " + user.getNick() + " :This server was created on 2023/07/19\r\n";
     std::string RPL_MOTD = serverName + " 372 " + user.getNick() + " :- Welcome to the most ludro IRC server ever -\r\n";
     std::string RPL_ENDOFMOTD = serverName + " 376 " + user.getNick() + " :End of MOTD command\r\n";
-    send(user.getSocket(), RPL_WELCOME.c_str(), RPL_WELCOME.length(), 0);
-    send(user.getSocket(), RPL_YOURHOST.c_str(), RPL_YOURHOST.length(), 0);
-    send(user.getSocket(), RPL_CREATED.c_str(), RPL_CREATED.length(), 0);
-    send(user.getSocket(), RPL_MOTD.c_str(), RPL_MOTD.length(), 0);
-    send(user.getSocket(), RPL_ENDOFMOTD.c_str(), RPL_ENDOFMOTD.length(), 0);
+    send(user.getSocket(), RPL_WELCOME.c_str(), RPL_WELCOME.length(), sndFlags);
+    send(user.getSocket(), RPL_YOURHOST.c_str(), RPL_YOURHOST.length(), sndFlags);
+    send(user.getSocket(), RPL_CREATED.c_str(), RPL_CREATED.length(), sndFlags);
+    send(user.getSocket(), RPL_MOTD.c_str(), RPL_MOTD.length(), sndFlags);
+    send(user.getSocket(), RPL_ENDOFMOTD.c_str(), RPL_ENDOFMOTD.length(), sndFlags);
 }
 
 bool Server::checkPassword(User& user, const std::string& PASS){
     if (PASS != serverPassword && !serverPassword.empty())
     {
         std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
-        send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), 0);
+        send(user.getSocket(), ERR_PASSWDMISMATCH.c_str(), ERR_PASSWDMISMATCH.length(), sndFlags);
         std::string quitmsg = "ERROR :Closing Link: " + IP + " (Connection refused by server)\r\n";
-        send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), 0);
+        send(user.getSocket(), quitmsg.c_str(), quitmsg.length(), sndFlags);
         
         close(user.getSocket());
         user.setSocket(-1);
