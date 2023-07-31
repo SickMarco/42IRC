@@ -100,7 +100,7 @@ void Channels::setModeUserLimit(const User& user, std::string buffer, const std:
 	size_t n = buffer.find_first_of("0123456789");
 	if (n == buffer.npos && !flag.compare("+l")) {
 		std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + flag + " :Not enough parameters\r\n";
-		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), 0);
+		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), sndFlags);
 		return;
 	}
 	else if (!flag.compare("+l")){
@@ -137,13 +137,13 @@ void Channels::setModeKey(const User& user, std::string buffer, std::string mode
 
 	if (chPass.empty() && !mode.compare("+k")){
 		std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + mode + " :Not enough parameters\r\n";
-		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), 0);
+		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), sndFlags);
 		return ;
 	}
 	if (channelExist(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
-        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
 	if (checkOperator(user, channelName) == false)

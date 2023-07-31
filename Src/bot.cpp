@@ -17,14 +17,14 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 	std::string cmd = "";
 	if (buffer.find("!bot") != buffer.npos && buffer.length() == 4) {
 		std::string notFound = ":Mimmomodem PRIVMSG #" + channelName + " :Command not found. [!bot help for command list]\r\n";
-		send(user.getSocket(), notFound.c_str(), notFound.length(), 0);
+		send(user.getSocket(), notFound.c_str(), notFound.length(), sndFlags);
 		return ;
 	}
 	if (buffer.find("!bot ") != buffer.npos)
 		cmd = buffer.substr(buffer.find("!bot ") + 5);
 	if (cmd.find("help") != cmd.npos){
 		std::string botHelp = ":Mimmomodem PRIVMSG #" + channelName + " :List of bot commands:\r\nmarasco\r\nlello\r\nrickroll\r\nbobbe\r\ncoin\r\nff on\\off\r\n";
-		send(user.getSocket(), botHelp.c_str(), botHelp.length(), 0);
+		send(user.getSocket(), botHelp.c_str(), botHelp.length(), sndFlags);
 	}
 	else if (cmd.find("marasco") != cmd.npos) {
 		std::string marasco = ":Mimmomodem PRIVMSG #" + channelName + " :https://youtu.be/_tGtYitmLLM?t=108\r\n";
@@ -64,6 +64,6 @@ void Channels::botCommand(const User& user, const std::string& channelName, std:
 	}
 	else {
 		std::string notFound = ":Mimmomodem PRIVMSG #" + channelName + " :Command not found. [!bot help for command list]\r\n";
-		send(user.getSocket(), notFound.c_str(), notFound.length(), 0);
+		send(user.getSocket(), notFound.c_str(), notFound.length(), sndFlags);
 	}
 }

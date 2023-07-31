@@ -57,7 +57,7 @@ void Server::commandHandler(User &user)
     else if (str.length() >= 7 && !strncmp(str.c_str(), "PING", 4))
     {
         std::string PONG = "PONG " + std::string(std::strtok(&user.msgBuffer[5], "\n")) + "\r\n";
-        send(user.getSocket(), PONG.c_str(), PONG.length(), 0);
+        send(user.getSocket(), PONG.c_str(), PONG.length(), sndFlags);
     }
     else if (str.length() >= 8 && !strncmp(str.c_str(), "QUIT :", 6))
         quit(&(user.msgBuffer[0]), user);
@@ -73,7 +73,7 @@ void Server::commandHandler(User &user)
         modeHandler(user, str);
     else if (strncmp(str.c_str(), "WHO ", 4) && strncmp(str.c_str(), "USERHOST ", 9)){
         std::string ERR_UNKNOWNCOMMAND = serverName + " 421 " + user.getNick() + " " + removeCRLF(&str[0]) + " :Unknown command\r\n";
-        send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), 0);
+        send(user.getSocket(), ERR_UNKNOWNCOMMAND.c_str(), ERR_UNKNOWNCOMMAND.length(), sndFlags);
     }
 }
 
@@ -103,13 +103,13 @@ int Server::messageToPrivate(User& user, std::string buffer)
     }
 	if (it == clients.end()){
 		std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + name + " :No such nick\r\n";
-		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), 0);
+		send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
 		return -1;
 	}
     std::string PRIVMSG = ":" + user.getNick() + "! PRIVMSG " + name + " " + mex + "\r\n";
 
     if (user.getNick() != name && clientSocket != -1)
-        send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), 0);
+        send(clientSocket, PRIVMSG.c_str(), PRIVMSG.length(), sndFlags);
     return 0;
 }
 
@@ -119,7 +119,7 @@ void Server::quit(char * buffer, User &user)
     std::vector <User> ::iterator it2 = clients.begin();
     std::string quitmsg = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " QUIT " + buf.substr(buf.find(':')) + "\r\n";
     for (; it2 != clients.end(); ++it2) {
-        send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), 0);}
+        send(it2->getSocket(), quitmsg.c_str(), quitmsg.length(), sndFlags);}
     
 	if (!strncmp(&buffer[6], "ragequit", 8)) // Server shutdown, only for valgrind test
 		isServerRunning = false;
@@ -195,7 +195,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
         {
             //send Nickname already taken and than return 
             std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
-            send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), 0);
+            send(user.getSocket(), ERR_NICKNAMEINUSE.c_str(),ERR_NICKNAMEINUSE.length(), sndFlags);
             return 1;
         }
     }
@@ -223,7 +223,7 @@ int Server::changeNick(std::string buffer, User &user, int flag)
     {    
         it = clients.begin();
         for (; it != clients.end(); it++)
-            send(it->getSocket(), nickmsg2.c_str(), nickmsg2.length(), 0);
+            send(it->getSocket(), nickmsg2.c_str(), nickmsg2.length(), sndFlags);
     }
     return 0;
 }
@@ -247,14 +247,14 @@ void Server::invite(std::string buffer, User &user)
 
     if (channels.channelExist(channelName) == false) 
     {
-        send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), 0);
+        send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
         return ;
     }
     
     std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
     if (findClient(chClients, user) == -1)
     {
-        send(user.getSocket(), ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), 0);
+        send(user.getSocket(), ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), sndFlags);
         return ;
     }
 
@@ -263,7 +263,7 @@ void Server::invite(std::string buffer, User &user)
     {
         if (findClient(chOper, user) == -1)
         {
-            send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), 0);
+            send(user.getSocket(), ERR_CHANOPRIVSNEEDED.c_str(), ERR_CHANOPRIVSNEEDED.length(), sndFlags);
             return ;
         }
         else
@@ -272,13 +272,13 @@ void Server::invite(std::string buffer, User &user)
 
     if (findClientByName(chClients, name) != -1)
     {
-        send(user.getSocket(), ERR_USERONCHANNEL.c_str(), ERR_USERONCHANNEL.length(), 0);
+        send(user.getSocket(), ERR_USERONCHANNEL.c_str(), ERR_USERONCHANNEL.length(), sndFlags);
         return ;
     }
 
     User target = clients[findClientByName(clients, name)];
-    send(user.getSocket(), RPL_INVITING.c_str(), RPL_INVITING.length(), 0);
-    send(target.getSocket(), INVITE.c_str(), INVITE.length(), 0);
+    send(user.getSocket(), RPL_INVITING.c_str(), RPL_INVITING.length(), sndFlags);
+    send(target.getSocket(), INVITE.c_str(), INVITE.length(), sndFlags);
 }
 
 void Server::kick(std::string buffer, User &user)
@@ -302,7 +302,7 @@ void Server::kick(std::string buffer, User &user)
     if (channels.channelExist(channelName) == false) 
     {
         err = ERR_NOSUCHCHANNEL;
-        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
     std::vector <User> & chClients = ((channels.getChannels())[channelName]).clients;
@@ -310,7 +310,7 @@ void Server::kick(std::string buffer, User &user)
     if (findClient(chClients, user) == -1)
     {
         err = ERR_NOTONCHANNEL;
-        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
     std::vector <User> & chOper = ((channels.getChannels())[channelName]).operators;
@@ -318,13 +318,13 @@ void Server::kick(std::string buffer, User &user)
     if (findClient(chOper, user) == -1)
     {
         err = ERR_CHANOPRIVSNEEDED;
-        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
     if (findClientByName(chClients, name) == -1)
     {
         err = ERR_USERNOTINCHANNEL;
-        send(user.getSocket(),  err.c_str(), err.length(), 0);
+        send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
     channels.sendToAll(channelName, KICK);

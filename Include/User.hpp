@@ -55,6 +55,8 @@ public:
 	std::string msgBuffer;
 };
 
+const int sndFlags = MSG_DONTWAIT | MSG_NOSIGNAL;
+
 std::string removeCRLF(const char* buffer);
 void 		printStringNoP(const char* str, std::size_t length);
 
