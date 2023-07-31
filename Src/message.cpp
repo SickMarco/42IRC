@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 17:56:50 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 20:18:05 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,22 @@ void Server::messageHandler(User& user)
 			perror("Receive error");
 			close(user.getSocket());
 			return ;
-		} else if (bytesRead == 0) {
+		}
+		else if (bytesRead == 0) {
             std::memset(user.buffer, 0, sizeof(user.buffer));
             user.msgBuffer.clear();
             std::string exit = ":Konversation terminated!\r\n";
             quit(&exit[0], user);
 			return ;
 		}
-		printStringNoP(user.buffer, strlen(user.buffer));  
         user.msgBuffer += std::string(user.buffer);
+		std::cout << user.msgBuffer << std::flush;
         if (!std::strchr(user.buffer, '\n'))
             return ;
-        commandHandler(user);
+		std::vector<std::string> cmds = split(user.msgBuffer, '\n');
+		std::vector<std::string>::iterator it = cmds.begin();
+		for(; it != cmds.end(); ++it)
+        	commandHandler(user);
         user.msgBuffer.clear();
 		std::memset(user.buffer, 0, sizeof(user.buffer));
 }
@@ -243,18 +247,19 @@ void Server::invite(std::string buffer, User &user)
     std::string ERR_CHANOPRIVSNEEDED = "ERR_CHANOPRIVSNEEDED :" + user.getNick() + " #" + channelName + "\r\n";//You're not channel operator
     std::string ERR_USERONCHANNEL = "ERR_USERONCHANNEL :" + user.getNick() + " " + name + " #" + channelName + " :is already on channel\r\n";
     std::string RPL_INVITING = "RPL_INVITING: " + user.getNick() + " " + name + " #" + channelName + "\r\n";//to the issuer of the message 
-    std::string INVITE = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " INVITE " + name + " #" + channelName + "\r\n";//with the issuer as <source>, to target user
+    std::string ERR_NOSUCHNICK = serverName + " 401 " + user.getNick() + " " + name + " :No such nick\r\n";
+	std::string INVITE = ":" + user.getNick() + "!" + user.getUser() + "@" + hostname + " INVITE " + name + " #" + channelName + "\r\n";//with the issuer as <source>, to target user
 
     if (channels.channelExist(channelName) == false) 
     {
         send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
         return ;
     }
-    
+
     std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
-    if (findClient(chClients, user) == -1)
+    if (findClientByName(chClients, name) == -1)
     {
-        send(user.getSocket(), ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), sndFlags);
+        send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
         return ;
     }
 
@@ -272,7 +277,7 @@ void Server::invite(std::string buffer, User &user)
 
     if (findClientByName(chClients, name) != -1)
     {
-        send(user.getSocket(), ERR_USERONCHANNEL.c_str(), ERR_USERONCHANNEL.length(), sndFlags);
+        send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
         return ;
     }
 

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 20:40:30 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 15:53:10 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 20:28:35 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,19 @@ void Server::modeHandler(const User& user, std::string buffer){
 void Channels::setModeOperator(const User& user, std::string buffer, const std::string& flag){
 	std::string newOper = extractNick(buffer);
 	std::string channelName = std::strtok(&buffer[6], " ");
-	if (checkOperator(user, channelName) == false)
-		return ;
+
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
-		int ind = findClientByName(it->second.clients, newOper);
-		if (ind == -1)
+		if (checkOperator(user, channelName) == false)
 			return ;
+		int idx = findClientByName(it->second.clients, newOper);
+		if (idx == -1){
+			std::string ERR_NOTONCHANNEL = "ERR_NOTONCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+			send(user.getSocket(), ERR_NOTONCHANNEL.c_str(), ERR_NOTONCHANNEL.length(), sndFlags);
+			return ;
+		}
 		if (!flag.compare("+o"))
-			it->second.operators.push_back(it->second.clients[ind]);
+			it->second.operators.push_back(it->second.clients[idx]);
 		else if (!flag.compare("-o"))
 		{
 			if (newOper == user.getNick() && channels[channelName].operators.size() == 1)
@@ -64,13 +68,17 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 		std::string setOperator = serverName + " MODE #" + channelName + " " + flag + " " +  newOper + "\r\n";
 		sendToAll(channelName, setOperator);
 	}
+	else {
+		std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+		send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
+	}
 }
 
 void Channels::setModeTopic(const User& user, const std::string& channelName, const std::string& flag){
-	if (checkOperator(user, channelName) == false)
-		return ;
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
+		if (checkOperator(user, channelName) == false)
+			return ;
 		if (!flag.compare("+t"))
 			it->second.topicMode = true;
 		else if (!flag.compare("-t"))
@@ -80,13 +88,17 @@ void Channels::setModeTopic(const User& user, const std::string& channelName, co
 		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
 		sendToAll(channelName, mode);
 	}
+	else {
+		std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+		send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
+	}
 }
 
 void Channels::setModeInviteOnly(const User& user, const std::string& channelName, const std::string& flag){
-	if (checkOperator(user, channelName) == false)
-		return ;
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end()){
+		if (checkOperator(user, channelName) == false)
+			return ;
 		if (!flag.compare("+i"))
 			it->second.inviteOnly = true;
 		else if (!flag.compare("-i"))
@@ -96,29 +108,33 @@ void Channels::setModeInviteOnly(const User& user, const std::string& channelNam
 		std::string mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + "\r\n";
 		sendToAll(channelName, mode);
 	}
+	else {
+		std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+		send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
+	}
 }
 
 void Channels::setModeUserLimit(const User& user, std::string buffer, const std::string& flag){
 	std::string channelName = std::strtok(&buffer[6], " ");
 	std::string maxStr , mode;
 	int max;
-	if (checkOperator(user, channelName) == false)
-		return ;
-	size_t n = buffer.find_first_of("0123456789");
-	if (n == buffer.npos && !flag.compare("+l")) {
-		std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + flag + " :Not enough parameters\r\n";
-		send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), sndFlags);
-		return;
-	}
-	else if (!flag.compare("+l")){
-		max = atoi(std::strtok(&buffer[n], "\n"));
-		std::stringstream ss;
-    	ss << max;
-    	maxStr = ss.str();
-		mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + " " + maxStr + "\r\n";
-	}
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
-	if (it != channels.end()){
+	if (it != channels.end()) {
+		if (checkOperator(user, channelName) == false)
+			return ;
+		size_t n = buffer.find_first_of("0123456789");
+		if (n == buffer.npos && !flag.compare("+l")) {
+			std::string ERR_NEEDMOREPARAMS = serverName + " 461 " + user.getNick() + " #" + channelName + " " + flag + " :Not enough parameters\r\n";
+			send(user.getSocket(), ERR_NEEDMOREPARAMS.c_str(), ERR_NEEDMOREPARAMS.length(), sndFlags);
+			return;
+		}
+		else if (!flag.compare("+l")){
+			max = atoi(std::strtok(&buffer[n], "\n"));
+			std::stringstream ss;
+			ss << max;
+			maxStr = ss.str();
+			mode = serverName + " 324 " + user.getNick() + " #" + channelName + " " + flag + " " + maxStr + "\r\n";
+		}
 		if (!flag.compare("+l")) {
 			it->second.userLimit = true;
 			it->second.userMax = max;
@@ -131,6 +147,10 @@ void Channels::setModeUserLimit(const User& user, std::string buffer, const std:
 		else
 			return ;
 		sendToAll(channelName, mode);
+	}
+	else {
+		std::string ERR_NOSUCHCHANNEL = "ERR_NOSUCHCHANNEL :" + user.getNick() + " #" + channelName + "\r\n";
+		send(user.getSocket(), ERR_NOSUCHCHANNEL.c_str(), ERR_NOSUCHCHANNEL.length(), sndFlags);
 	}
 }
 

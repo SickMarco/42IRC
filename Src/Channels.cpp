@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:58:42 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 17:54:59 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:58:38 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,6 @@ int  Channels::checkChannelModes(const User& user, const std::string channelName
         }
         if ((!channels[channelName].passKey.empty()) && channels[channelName].passKey != key)
         {
-        //    std::cout << "'" << channels[channelName].passKey << "'  '" << key << std::endl;
             std::string ERR_BADCHANNELKEY = "ERR_BADCHANNELKEY :" + user.getNick() + " #" + channelName + ":Cannot join channel (+k)\r\n";
             send(user.getSocket(), ERR_BADCHANNELKEY.c_str(), ERR_BADCHANNELKEY.length(), sndFlags);
             return 1;
