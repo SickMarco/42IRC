@@ -15,6 +15,8 @@ It’s always a good thing to know.
 ```
 You can test the server with [Netcat](https://en.wikipedia.org/wiki/Netcat) or enjoy [Konversation](https://konversation.kde.org/) graphical user interface.
 
+>Port: 6667 | Password: ktm
+
 ## ![konversation](https://github.com/SickMarco/42IRC/assets/107865727/704b8153-f432-4a16-aee5-c17923bea80a) Konversation preview
 
 https://github.com/SickMarco/42IRC/assets/107865727/1b2dec76-b0a1-4bbd-999c-3d8750211a54
