@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 12:23:31 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 14:58:50 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,14 +53,7 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         
         close(user.getSocket());
         user.setSocket(-1);
-        user.setNick("");
-        user.setUser("");
-        user.setIP("");
-        user.setPass("");
-        user.msgBuffer.clear();
-        memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
-        memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
-        memset(user.buffer, 0, sizeof(user.buffer));
+        user.reset();
         clientsConnected--;
         return false;
     }
@@ -146,7 +139,7 @@ void Server::run() {
                     if (clientsConnected == MAX_CLIENTS || newClientHandler() < 0)
                         continue;
             }
-            else
+            else if (clientSocket != -1)
                 messageHandler(clients[findClientIndex(clientSocket)]);
         }
     }

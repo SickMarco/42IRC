@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 12:19:45 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 14:51:20 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ public:
 	void setNick(std::string input);
 	void setUser(std::string newUser);
 	void setPass(const std::string& passw);
+
+	void reset();
 
 	char buffer[1024];
 	std::string msgBuffer;

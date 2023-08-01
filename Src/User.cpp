@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 12:25:43 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 14:59:07 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,3 +54,16 @@ User&  User::operator=(const User& src){
 std::string User::getPass() const { return this->serverPass; }
 
 void  User::setPass(const std::string& passw) { this->serverPass = passw; }
+
+void User::reset(){
+	this->nick = "";
+    this->user = "";
+    this->ServerIP = "";
+    this->serverPass = "";
+	this->login = false;
+    this->msgBuffer.clear();
+	this->channelsJoined.clear();
+    memset(&(this->getAddr()), 0, sizeof(this->getAddr()));
+    memset(&(this->getAddrLen()), 0, sizeof(this->getAddrLen()));
+    memset(this->buffer, 0, sizeof(this->buffer));
+}
