@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 16:37:49 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 16:50:19 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,8 +290,7 @@ void Server::invite(std::string buffer, User &user)
         return ;
     }
 
-    std::vector <User> chClients = ((channels.getChannels())[channelName]).clients;
-    if (findClientByName(chClients, name) == -1)
+    if (findClientByName(clients, name) == -1)
     {
         send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
         return ;
@@ -307,12 +306,6 @@ void Server::invite(std::string buffer, User &user)
         }
         else
             ((channels.getChannels())[channelName]).invitelist.insert(name);
-    }
-
-    if (findClientByName(chClients, name) != -1)
-    {
-        send(user.getSocket(), ERR_NOSUCHNICK.c_str(), ERR_NOSUCHNICK.length(), sndFlags);
-        return ;
     }
 
     User target = clients[findClientByName(clients, name)];
