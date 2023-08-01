@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 12:23:00 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 16:37:49 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,15 +211,7 @@ void Server::quit(char * buffer, User &user)
     user.setSocket(-1);
 
     //cleaning user data
-    user.setNick("");
-    user.setUser("");
-    user.setIP("");
-    user.setPass("");
-    memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
-    memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
-    user.getChannels().clear();
-    memset(user.buffer, 0, sizeof(user.buffer));
-	user.msgBuffer.clear();
+    user.reset();
     clientsConnected--;
 }
 
