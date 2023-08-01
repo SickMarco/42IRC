@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:51 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 19:58:24 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 12:14:39 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,12 +54,11 @@ private:
 	Channels channels;
 	int clientsConnected;
 	int newClientHandler();
-	int newClientConnected(User& user);
 	int findClientIndex(int clientSocket);
-	bool checkPassword(User& user, const std::string& PASS);
-	bool setNewUser(User& user);
-	void welcomeMsg(const User& user);
 	void messageHandler(User& user);
+	void loginHandler(User& user, std::vector<std::string>& cmds);
+	bool checkPassword(User& user, const std::string& PASS);
+	void welcomeMsg(const User& user);
 	void commandHandler(User &user);
 	//CMDS
 	int messageToPrivate(User& user, std::string buffer);

@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:03 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/29 18:36:27 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 12:19:45 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ private:
 	int clientSocket;
 	std::string nick;
 	std::string user;
+	std::string serverPass;
 
 	std::string ServerIP;
 	std::vector <std::string> channelsJoined;
@@ -44,15 +45,18 @@ public:
 	void setSocket(const int& newSocket);
 	void setIP(const std::string& IP);
 
+	std::string getPass() const;
 	std::string getUser() const;
 	std::string getNick() const;
 	std::vector<std::string>& getChannels();
 
 	void setNick(std::string input);
 	void setUser(std::string newUser);
+	void setPass(const std::string& passw);
 
 	char buffer[1024];
 	std::string msgBuffer;
+	bool login;
 };
 
 const int sndFlags = MSG_DONTWAIT | MSG_NOSIGNAL;

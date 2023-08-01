@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/11 17:27:53 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 21:50:52 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 12:23:31 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ void Server::welcomeMsg(const User& user){
 }
 
 bool Server::checkPassword(User& user, const std::string& PASS){
-    std::cout << PASS << " " << serverPassword << std::endl;
     if (PASS != serverPassword && !serverPassword.empty())
     {
         std::string ERR_PASSWDMISMATCH = serverName + " ERR_PASSWDMISMATCH :Password incorrect.\r\n";
@@ -57,6 +56,7 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         user.setNick("");
         user.setUser("");
         user.setIP("");
+        user.setPass("");
         user.msgBuffer.clear();
         memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
         memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
@@ -65,73 +65,6 @@ bool Server::checkPassword(User& user, const std::string& PASS){
         return false;
     }
     return true;
-}
-
-bool Server::setNewUser(User& user){
-	bool userAlreadExist = false;
-	ssize_t bytesRead;
-	std::string line, command, param;
-	std::stringstream ss(user.msgBuffer);
-	char delim;
-
-    while (std::getline(ss, line, '\n')){
-        std::istringstream iss(line);
-        iss >> command;
-        if (command.find("PASS") != command.npos){
-			iss >> delim >> param;
-            if (checkPassword(user, param) == false)
-                return false;
-		}
-        else if (command.find("NICK") != command.npos){
-			iss >> param;
-			userAlreadExist = changeNick(removeCRLF(param.c_str()), user, 1);
-		}
-        else if (command.find("USER") != command.npos){
-			iss >> param;
-			user.setUser(removeCRLF(param.c_str()));
-		}
-    }
-	while (userAlreadExist == true){
-		bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
-        user.buffer[bytesRead] = '\0';
-        std::cout << user.buffer << std::flush;
-		if (!strncmp(user.buffer, "NICK ", 5))
-			userAlreadExist = changeNick(removeCRLF(&user.buffer[5]), user, 1);
-		memset(user.buffer, 0, 1024);
-	}
-	return true;
-}
-
-int Server::newClientConnected(User& user)
-{
-    ssize_t bytesRead = 0;
-	user.setIP(IP);
-    int time_begins = time(NULL);
-    int time_now = time_begins;
-    while (1)
-    {
-        if (time_now - time_begins > 10)
-        {
-            std::cout << "timeout" << std::endl;
-            return -1;
-        }
-        bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
-        user.buffer[bytesRead] = '\0';
-        std::cout << user.buffer << std::flush;
-        user.msgBuffer += user.buffer;
-        memset(user.buffer, 0, 1024);
-        if (user.msgBuffer.find("PASS ") != user.msgBuffer.npos &&
-            user.msgBuffer.find("NICK ") != user.msgBuffer.npos &&
-            user.msgBuffer.find("USER ") != user.msgBuffer.npos)
-                break;
-        time_now = time(NULL);
-    }
-    std::cout << user.msgBuffer << std::flush;
-	if (setNewUser(user) == false)
-		return 1;
-    user.msgBuffer.clear();
-    welcomeMsg(user);
-    return 0;
 }
 
 int Server::findClientIndex(int fd) {
@@ -170,33 +103,12 @@ int Server::newClientHandler() {
     }
     // Set user socket
     clients[i].setSocket(clientSocket);
+    clients[i].setIP(IP);
     clientsConnected++;
     // Add the new socket to epollun 
     if (addSocketToEpoll(clientSocket) < 0){
         close(clientSocket);
         clients[i].setSocket(-1);
-        clientsConnected--;
-        return -1;
-    }
-    if (newClientConnected(clients[i]) == -1)
-    {
-        std::string quitmsg = "ERROR :Timeout, Closing Link: " + IP + " (Connection refused by server)\r\n";
-        send(clients[i].getSocket(), quitmsg.c_str(), quitmsg.length(), sndFlags);
-        // Remove socket client from epoll
-        if (epoll_ctl(epollFd, EPOLL_CTL_DEL, clients[i].getSocket(), NULL) < 0)
-            perror("Error removing client from epoll");
-        close(clients[i].getSocket());
-        clients[i].setSocket(-1);
-
-        //cleaning user data
-        clients[i].setNick("");
-        clients[i].setUser("");
-        clients[i].setIP("");
-        memset(&(clients[i].getAddr()), 0, sizeof(clients[i].getAddr()));
-        memset(&(clients[i].getAddrLen()), 0, sizeof(clients[i].getAddrLen()));
-        clients[i].getChannels().clear();
-        memset(clients[i].buffer, 0, sizeof(clients[i].buffer));
-        clients[i].msgBuffer.clear();
         clientsConnected--;
         return -1;
     }

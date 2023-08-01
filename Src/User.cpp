@@ -6,13 +6,13 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 18:09:11 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/30 18:52:01 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 12:25:43 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
 
-User::User() : clientAddrLen(sizeof(clientAddr)), clientSocket(-1), msgBuffer("") {
+User::User() : clientAddrLen(sizeof(clientAddr)), clientSocket(-1), serverPass(""), msgBuffer(""), login(false) {
 	memset(buffer, 0, sizeof(buffer));
 }
 
@@ -50,3 +50,7 @@ User&  User::operator=(const User& src){
 	}
 	return *this;
 }
+
+std::string User::getPass() const { return this->serverPass; }
+
+void  User::setPass(const std::string& passw) { this->serverPass = passw; }

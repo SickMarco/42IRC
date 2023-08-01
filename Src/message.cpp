@@ -6,11 +6,41 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/07/31 20:18:05 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 12:23:00 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+void Server::loginHandler(User& user, std::vector<std::string>& cmds){
+    int userAlreadExist = 0;
+    std::string line, command, param;
+    char delim;
+    std::vector<std::string>::iterator it = cmds.begin();
+    for(; it != cmds.end(); ++it){
+        std::istringstream iss(*it);
+        iss >> command;
+        if (!command.compare(0, 5, "PASS\0")){
+			iss >> delim >> param;
+            if (checkPassword(user, param) == false)
+                return ;
+            user.setPass(param);
+		}
+        else if (!command.compare(0, 5, "NICK\0")){
+			iss >> param;
+			userAlreadExist = changeNick(removeCRLF(param.c_str()), user, 1);
+		}
+        else if (!command.compare(0, 5, "USER\0")){
+			iss >> param;
+			user.setUser(removeCRLF(param.c_str()));
+		}
+    }
+    if (!user.getPass().empty() && !user.getNick().empty() && userAlreadExist == 0 && !user.getUser().empty()){
+        user.login = true;
+        welcomeMsg(user);
+    }
+    user.msgBuffer.clear();
+}
 
 void Server::messageHandler(User& user)
 {
@@ -33,6 +63,10 @@ void Server::messageHandler(User& user)
         if (!std::strchr(user.buffer, '\n'))
             return ;
 		std::vector<std::string> cmds = split(user.msgBuffer, '\n');
+        if (user.login == false){
+            loginHandler(user, cmds);
+            return ;
+        }
 		std::vector<std::string>::iterator it = cmds.begin();
 		for(; it != cmds.end(); ++it)
         	commandHandler(user);
@@ -180,6 +214,7 @@ void Server::quit(char * buffer, User &user)
     user.setNick("");
     user.setUser("");
     user.setIP("");
+    user.setPass("");
     memset(&(user.getAddr()), 0, sizeof(user.getAddr()));
     memset(&(user.getAddrLen()), 0, sizeof(user.getAddrLen()));
     user.getChannels().clear();
