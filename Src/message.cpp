@@ -375,6 +375,7 @@ void Server::kick(std::string buffer, User &user)
         return ;
     }
     
+    channels.sendToAll(channelName, KICK);
     User & target = chClients[findClientByName(chClients, name)];
     //remove op
     if (findClientByName(chOper, name) != -1)
@@ -405,6 +406,4 @@ void Server::kick(std::string buffer, User &user)
             }
         }
     }
-    channels.sendToAll(channelName, KICK);
-    send(target.getSocket(), KICK.c_str(), KICK.length(), sndFlags);
 }
