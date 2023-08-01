@@ -132,7 +132,8 @@ void Channels::leaveChannel(User& user, std::string channelName, std::string mes
         if (findClientByName(channelops, user.getNick()) != -1)
             channelops.erase(std::remove(channelops.begin(), channelops.end(), user), channelops.end());
         // Update user channel list
-        user.getChannels().erase(std::remove(user.getChannels().begin(), user.getChannels().end(), channelName), user.getChannels().end());
+        std::vector<std::string> & uChans = user.getChannels();
+        uChans.erase(std::remove(uChans.begin(), uChans.end(), channelName), uChans.end());
         
         if  (channelusers.size() == 0 ||    //remove channel if there are no more users in the channel
             (channelusers.size() == 1 && findClientByName(channelusers, "Mimmomodem") != -1))
@@ -220,7 +221,8 @@ void Channels::setTopic(const User& user, const std::string& channelName, std::s
 void Channels::topic(const User& user, std::string buffer){
     std::string cmd, channelName, arg;
 
-    buffer.erase(std::remove(buffer.begin(), buffer.end(), '#'), buffer.end());
+    if (strchr(buffer.c_str(), '#') != NULL)
+        buffer.erase(std::remove(buffer.begin(), buffer.end(), '#'), buffer.end());
 
     std::istringstream iss(buffer);
     iss >> cmd >> channelName >> arg;

@@ -110,10 +110,10 @@ int Server::newClientConnected(User& user)
     int time_now = time_begins;
     while (1)
     {
-        if (time_now - time_begins > 15)
+        if (time_now - time_begins > 10)
         {
             std::cout << "timeout" << std::endl;
-            return 1;
+            return -1;
         }
         bytesRead = recv(user.getSocket(), user.buffer, sizeof(user.buffer) - 1, 0);
         user.buffer[bytesRead] = '\0';
@@ -178,7 +178,28 @@ int Server::newClientHandler() {
         clientsConnected--;
         return -1;
     }
-    newClientConnected(clients[i]);
+    if (newClientConnected(clients[i]) == -1)
+    {
+        std::string quitmsg = "ERROR :Timeout, Closing Link: " + IP + " (Connection refused by server)\r\n";
+        send(clients[i].getSocket(), quitmsg.c_str(), quitmsg.length(), sndFlags);
+        // Remove socket client from epoll
+        if (epoll_ctl(epollFd, EPOLL_CTL_DEL, clients[i].getSocket(), NULL) < 0)
+            perror("Error removing client from epoll");
+        close(clients[i].getSocket());
+        clients[i].setSocket(-1);
+
+        //cleaning user data
+        clients[i].setNick("");
+        clients[i].setUser("");
+        clients[i].setIP("");
+        memset(&(clients[i].getAddr()), 0, sizeof(clients[i].getAddr()));
+        memset(&(clients[i].getAddrLen()), 0, sizeof(clients[i].getAddrLen()));
+        clients[i].getChannels().clear();
+        memset(clients[i].buffer, 0, sizeof(clients[i].buffer));
+        clients[i].msgBuffer.clear();
+        clientsConnected--;
+        return -1;
+    }
     return i;
 }
 

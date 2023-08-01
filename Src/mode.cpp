@@ -58,7 +58,8 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 			it->second.operators.push_back(it->second.clients[idx]);
 		else if (!flag.compare("-o"))
 		{
-			if (findClientByName(channels[channelName].operators, newOper) != -1)
+			int idxOp = findClientByName(channels[channelName].operators, newOper);
+			if (idxOp == -1)
 			{
 				send(user.getSocket(), ("ERROR " + newOper + " is not an operator\r\n").c_str(), std::string("ERROR " + newOper + " is not an operator\r\n").length(), sndFlags);
 				return;
@@ -68,7 +69,9 @@ void Channels::setModeOperator(const User& user, std::string buffer, const std::
 				send(user.getSocket(), "ERROR You are un coglione\r\n", std::string("ERROR You are un coglione\r\n").length(), sndFlags);
 				return;
 			}
-			it->second.operators.erase(std::find(it->second.operators.begin(), it->second.operators.end(), user));
+			std::vector<User> & opsList = it->second.operators;
+			if (idxOp != -1)
+				opsList.erase(std::remove(opsList.begin(), opsList.end(), opsList[idxOp]), opsList.end());
 		}
 		std::string setOperator = serverName + " MODE #" + channelName + " " + flag + " " +  newOper + "\r\n";
 		sendToAll(channelName, setOperator);

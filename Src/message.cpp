@@ -193,9 +193,16 @@ int Server::changeNick(std::string buffer, User &user, int flag)
 	if (buffer.find('\n') != buffer.npos)
 		buffer = removeCRLF(&buffer[0]);
     std::vector <User> ::iterator it = clients.begin();
+
+    if (!buffer.compare("Mimmomodem") || strchr(buffer.c_str(), ':')!= NULL)
+    {
+        send(user.getSocket(), "ERROR Invalid nickname\r\n", std::string("ERROR Invalid nickname\r\n").length(), sndFlags);
+        return 1;
+    }
+    
     for (; it != clients.end(); it++)
     {
-        if (buffer == it->getNick() || !buffer.compare("Mimmomodem"))
+        if (buffer == it->getNick())
         {
             //send Nickname already taken and than return 
             std::string ERR_NICKNAMEINUSE = serverName + " 433 * " + it->getNick() + " :Nickname is already in use\r\n";
@@ -332,8 +339,7 @@ void Server::kick(std::string buffer, User &user)
         send(user.getSocket(),  err.c_str(), err.length(), sndFlags);
         return ;
     }
-    channels.sendToAll(channelName, KICK);
- 
+    
     User & target = chClients[findClientByName(chClients, name)];
     //remove op
     if (findClientByName(chOper, name) != -1)
@@ -341,7 +347,8 @@ void Server::kick(std::string buffer, User &user)
     // remove the user from the channel participants
     chClients.erase(std::remove(chClients.begin(), chClients.end(), target), chClients.end());
     // Update user channel list
-    target.getChannels().erase(std::remove(target.getChannels().begin(), target.getChannels().end(), channelName), target.getChannels().end());
+    std::vector<std::string> & tChans = target.getChannels();
+    tChans.erase(std::remove(tChans.begin(), tChans.end(), channelName), tChans.end());
     
     //(if you kicked yourserlf)
     //remove channel if there are no more users in the channel
@@ -363,4 +370,6 @@ void Server::kick(std::string buffer, User &user)
             }
         }
     }
+    channels.sendToAll(channelName, KICK);
+    send(target.getSocket(), KICK.c_str(), KICK.length(), sndFlags);
 }
