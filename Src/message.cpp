@@ -6,7 +6,7 @@
 /*   By: mbozzi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/19 15:05:46 by mbozzi            #+#    #+#             */
-/*   Updated: 2023/08/01 16:50:19 by mbozzi           ###   ########.fr       */
+/*   Updated: 2023/08/01 17:10:53 by mbozzi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void Server::messageHandler(User& user)
 			return ;
 		}
         user.msgBuffer += std::string(user.buffer);
-		std::cout << user.msgBuffer << std::flush;
+		std::cout << user.buffer << std::flush;
         if (!std::strchr(user.buffer, '\n'))
             return ;
 		std::vector<std::string> cmds = split(user.msgBuffer, '\n');
@@ -369,7 +369,9 @@ void Server::kick(std::string buffer, User &user)
     chClients.erase(std::remove(chClients.begin(), chClients.end(), target), chClients.end());
     // Update user channel list
     std::vector<std::string> & tChans = target.getChannels();
-    tChans.erase(std::remove(tChans.begin(), tChans.end(), channelName), tChans.end());
+    std::vector<std::string>::iterator itChan = std::find(tChans.begin(), tChans.end(), channelName);
+    if (itChan != tChans.end())
+        tChans.erase(std::remove(tChans.begin(), tChans.end(), *itChan), tChans.end());
     
     //(if you kicked yourserlf)
     //remove channel if there are no more users in the channel
